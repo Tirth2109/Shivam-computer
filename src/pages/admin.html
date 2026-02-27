@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | Shivam Computer</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body data-page="admin">
+    <header class="site-header">
+      <div class="logo">Shivam Computer Admin</div>
+      <nav>
+        <a href="../index.html">Storefront</a>
+        <a href="./login.html">Login</a>
+      </nav>
+    </header>
+
+    <main class="admin-page">
+      <section class="stats-grid">
+        <article>
+          <p>Products live</p>
+          <h2 id="stat-products">0</h2>
+        </article>
+        <article>
+          <p>Active orders</p>
+          <h2 id="stat-orders">0</h2>
+        </article>
+        <article>
+          <p>Low-stock alerts</p>
+          <h2 id="stat-lowstock">0</h2>
+        </article>
+        <article>
+          <p>Automation runs</p>
+          <h2 id="stat-automation">0</h2>
+        </article>
+      </section>
+
+      <section class="order-panel">
+        <div class="section-heading">
+          <h3>Incoming mock orders</h3>
+          <p>Orders submitted from the storefront UI push in here automatically.</p>
+        </div>
+        <div id="order-feed" class="order-feed"></div>
+      </section>
+
+      <section class="automation-panel">
+        <div>
+          <h3>Automation queue</h3>
+          <ul id="automation-log"></ul>
+        </div>
+        <div class="admin-actions">
+          <button id="simulate-order" class="btn outline">Simulate order</button>
+          <button id="clear-orders" class="btn secondary">Clear mock orders</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="../app.js"></script>
+  </body>
+</html>
