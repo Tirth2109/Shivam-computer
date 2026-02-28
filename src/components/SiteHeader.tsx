@@ -21,7 +21,7 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="header-top">
         <Link to="/" className="header-logo">
-          <img src="/shivam-logo.webp" alt="" className="logo-img" />
+          <img src="/shivam-logo1.webp" alt="" className="logo-img" />
           <span className="logo-text">Shivam Computer</span>
         </Link>
 
