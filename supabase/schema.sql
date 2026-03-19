@@ -28,7 +28,28 @@ CREATE TABLE IF NOT EXISTS products (
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read access (anyone can view products)
+DROP POLICY IF EXISTS "Allow public read" ON products;
+DROP POLICY IF EXISTS "Allow all for anon" ON products;
+DROP POLICY IF EXISTS "Allow write for authenticated" ON products;
+DROP POLICY IF EXISTS "Allow update for authenticated" ON products;
+DROP POLICY IF EXISTS "Allow delete for authenticated" ON products;
+
 CREATE POLICY "Allow public read" ON products FOR SELECT USING (true);
 
--- Allow insert/update/delete for anon (or restrict to auth users - adjust as needed)
-CREATE POLICY "Allow all for anon" ON products FOR ALL USING (true) WITH CHECK (true);
+-- Only signed-in users can write to products.
+-- This matches the app's "Login -> access admin" flow.
+CREATE POLICY "Allow write for authenticated" ON products
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow update for authenticated" ON products
+FOR UPDATE
+TO authenticated
+USING (auth.uid() IS NOT NULL)
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow delete for authenticated" ON products
+FOR DELETE
+TO authenticated
+USING (auth.uid() IS NOT NULL);

@@ -203,6 +203,22 @@ main {
   gap: 0.5rem;
 }
 
+.header-user-greeting {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 800;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.header-user-greeting:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
 .header-icon-btn {
   display: inline-flex;
   align-items: center;

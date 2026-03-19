@@ -3,12 +3,17 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { navCategories } from "../data/categories";
+import { useAuth } from "../context/AuthContext";
 
 export default function SiteHeader() {
   const location = useLocation();
   const navigate = useNavigate();
   const { count } = useCart();
+<<<<<<< Updated upstream
   const { user, logout } = useAuth();
+=======
+  const { user, loading: authLoading, signOut } = useAuth();
+>>>>>>> Stashed changes
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -39,6 +44,7 @@ export default function SiteHeader() {
         </form>
 
         <div className="header-actions">
+<<<<<<< Updated upstream
           <div className="account-dropdown-wrapper">
             <Link to={user ? "/account" : "/login"} className="header-icon-btn" title={user ? "Account" : "Login"} aria-label={user ? "Account" : "Login"}>
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -119,6 +125,58 @@ export default function SiteHeader() {
               )}
             </div>
           </div>
+=======
+          {!authLoading && user && (
+            <Link to="/admin" className="header-user-greeting" title="Go to admin">
+              Hi{" "}
+              {(
+                // Stored during signUp: supabase.auth.signUp({ options: { data: { fullName }}})
+                (user.user_metadata as { fullName?: string } | undefined)?.fullName ??
+                user.email?.split("@")[0] ??
+                "there"
+              ).toString()}
+            </Link>
+          )}
+
+          {!authLoading && user ? (
+            <button
+              type="button"
+              className="header-icon-btn"
+              title="Logout"
+              aria-label="Logout"
+              onClick={() => {
+                void signOut().finally(() => {
+                  navigate("/login");
+                });
+              }}
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                />
+              </svg>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="header-icon-btn"
+              title="Account / Login"
+              aria-label="Account / Login"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </Link>
+          )}
+>>>>>>> Stashed changes
           <Link to="/wishlist" className="header-icon-btn" title="Wishlist" aria-label="Wishlist">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
           </Link>

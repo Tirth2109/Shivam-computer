@@ -10,6 +10,7 @@ import {
 import type { Product } from "../types";
 import { initialProducts } from "../data/products";
 import { isSupabaseConfigured } from "../lib/supabase";
+import { useAuth } from "./AuthContext";
 import {
   fetchProducts,
   addProductToSupabase,
@@ -60,6 +61,7 @@ function saveToStorage(products: Product[]) {
 
 export function ProductsProvider({ children }: { children: ReactNode }) {
   const useSupabase = isSupabaseConfigured();
+  const { user, loading: authLoading } = useAuth();
   const [products, setProducts] = useState<Product[]>(
     useSupabase ? initialProducts : loadFromStorage()
   );
@@ -77,18 +79,25 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
       .then((data) => {
         if (data.length > 0) {
           setProducts(data);
-        } else {
-          seedProducts(initialProducts)
-            .then(() => setProducts(initialProducts))
-            .catch((e) => console.warn("Seed failed:", e));
+          return;
         }
+
+        // Avoid failing RLS-protected INSERTs for visitors who aren't signed in yet.
+        if (!user) {
+          setProducts(initialProducts);
+          return;
+        }
+
+        return seedProducts(initialProducts)
+          .then(() => setProducts(initialProducts))
+          .catch((e) => console.warn("Seed failed:", e));
       })
       .catch((e) => {
         setError(e.message ?? "Failed to load products");
         setProducts(loadFromStorage());
       })
       .finally(() => setLoading(false));
-  }, [useSupabase]);
+  }, [useSupabase, user, authLoading]);
 
   useEffect(() => {
     if (!useSupabase) saveToStorage(products);

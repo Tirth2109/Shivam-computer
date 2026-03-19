@@ -4,9 +4,11 @@ import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
 import AdminProductForm from "../components/AdminProductForm";
 import { useProducts } from "../context/ProductsContext";
+import { useAuth } from "../context/AuthContext";
 import { useMockAutomation } from "../hooks/useMockAutomation";
 import { useAuth } from "../context/AuthContext";
 import type { Product } from "../types";
+import { isSupabaseConfigured } from "../lib/supabase";
 
 export default function AdminPage() {
   const {
@@ -44,7 +46,23 @@ export default function AdminPage() {
     );
   }, [products, productSearch]);
 
+<<<<<<< Updated upstream
   const { user: currentUser } = useAuth();
+=======
+  const supabaseEnabled = isSupabaseConfigured();
+  const { user, loading: authLoading } = useAuth();
+
+  const currentUser = useMemo(() => {
+    if (supabaseEnabled) return null;
+    const stored = localStorage.getItem("summitCurrentUser");
+    if (!stored) return null;
+    try {
+      return JSON.parse(stored) as { username: string; role: string };
+    } catch {
+      return null;
+    }
+  }, [supabaseEnabled]);
+>>>>>>> Stashed changes
 
   const handleSaveProduct = async (p: Product) => {
     try {
@@ -74,7 +92,40 @@ export default function AdminPage() {
     }
   };
 
-  if (!currentUser) {
+  if (supabaseEnabled) {
+    if (authLoading) {
+      return (
+        <>
+          <HeaderWithDeals />
+          <main className="auth-page">
+            <div className="auth-card">
+              <h1>Loading…</h1>
+              <p>Checking your session.</p>
+            </div>
+          </main>
+          <Footer />
+        </>
+      );
+    }
+
+    if (!user) {
+      return (
+        <>
+          <HeaderWithDeals />
+          <main className="auth-page">
+            <div className="auth-card">
+              <h1>Access restricted</h1>
+              <p>Please sign in to access the admin dashboard.</p>
+              <Link className="btn primary" to="/login">
+                Go to login
+              </Link>
+            </div>
+          </main>
+          <Footer />
+        </>
+      );
+    }
+  } else if (!currentUser) {
     return (
       <>
         <HeaderWithDeals />

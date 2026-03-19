@@ -2,8 +2,13 @@ import { FormEvent, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { users } from "../data/users";
 import type { User } from "../types";
+<<<<<<< Updated upstream
 import { supabase, isSupabaseConfigured } from "../lib/supabase";
 import { useAuth } from "../context/AuthContext";
+=======
+import { useAuth } from "../context/AuthContext";
+import { isSupabaseConfigured } from "../lib/supabase";
+>>>>>>> Stashed changes
 
 const REGISTERED_USERS_KEY = "shivam_registered_users";
 
@@ -28,7 +33,12 @@ export default function LoginPage() {
   const [statusColor, setStatusColor] = useState("#0b1d40");
   
   const navigate = useNavigate();
+<<<<<<< Updated upstream
   const { user, setUser } = useAuth();
+=======
+  const supabaseEnabled = isSupabaseConfigured();
+  const { signInWithPassword, signUp } = useAuth();
+>>>>>>> Stashed changes
 
   useEffect(() => {
     if (user) {
@@ -41,10 +51,43 @@ export default function LoginPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+<<<<<<< Updated upstream
     const id = formData.get("identifier")?.toString().trim() ?? "";
 
     if (id.length < 3) {
       setStatus("Please enter a valid Email or Phone Number.");
+=======
+    const username = formData.get("username")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
+    const password = formData.get("password")?.toString() ?? "";
+
+    if (supabaseEnabled) {
+      void (async () => {
+        try {
+          if (!email) {
+            setStatus("Please enter your email.");
+            setStatusColor("#dc2626");
+            return;
+          }
+          await signInWithPassword({ email, password });
+          setStatus("Signed in! Redirecting to the admin.");
+          setStatusColor("#059669");
+          setTimeout(() => navigate("/admin"), 400);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "Failed to sign in";
+          setStatus(msg);
+          setStatusColor("#dc2626");
+        }
+      })();
+      return;
+    }
+
+    const match = getAllUsers().find(
+      (user) => user.username === username && user.password === password
+    );
+    if (!match) {
+      setStatus("Credentials do not match our records.");
+>>>>>>> Stashed changes
       setStatusColor("#dc2626");
       return;
     }
@@ -83,10 +126,64 @@ export default function LoginPage() {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
+<<<<<<< Updated upstream
     const token = formData.get("token")?.toString().trim() ?? "";
 
     if (token.length < 6) {
       setStatus("Please enter the 6-digit code.");
+=======
+    const username = formData.get("username")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
+    const password = formData.get("password")?.toString() ?? "";
+    const fullName = formData.get("fullName")?.toString().trim() ?? "";
+
+    if (supabaseEnabled) {
+      if (!email) {
+        setStatus("Please enter your email.");
+        setStatusColor("#dc2626");
+        return;
+      }
+      if (password.length < 6) {
+        setStatus("Password must be at least 6 characters.");
+        setStatusColor("#dc2626");
+        return;
+      }
+      if (!fullName.trim()) {
+        setStatus("Please enter your full name.");
+        setStatusColor("#dc2626");
+        return;
+      }
+      void (async () => {
+        try {
+          await signUp({ email, password, fullName });
+          setStatus(
+            "Account created! Now sign in. (If email confirmation is enabled, please confirm first.)"
+          );
+          setStatusColor("#059669");
+          setMode("login");
+          (form as HTMLFormElement).reset();
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "Failed to sign up";
+          setStatus(msg);
+          setStatusColor("#dc2626");
+        }
+      })();
+      return;
+    }
+
+    if (username.length < 3) {
+      setStatus("Username must be at least 3 characters.");
+      setStatusColor("#dc2626");
+      return;
+    }
+    if (password.length < 6) {
+      setStatus("Password must be at least 6 characters.");
+      setStatusColor("#dc2626");
+      return;
+    }
+    if (!fullName.trim()) {
+      setStatus("Please enter your full name.");
+>>>>>>> Stashed changes
       setStatusColor("#dc2626");
       return;
     }
@@ -176,6 +273,7 @@ export default function LoginPage() {
       <div className="auth-card">
         {step === 1 ? (
           <>
+<<<<<<< Updated upstream
             <h1 style={{ marginBottom: "0.5rem" }}>Sign in / Sign up</h1>
             <p>Access your Shivam Computer account with a single code.</p>
             <form id="otp-send-form" onSubmit={handleSendOtp} style={{ marginTop: "1.5rem" }}>
@@ -188,6 +286,20 @@ export default function LoginPage() {
                   autoComplete="username"
                   required
                   placeholder="Enter email or phone number"
+=======
+            <h1>Login</h1>
+            <p>Sign in to access the Shivam Computer admin dashboard.</p>
+            <form id="login-form" onSubmit={handleLogin}>
+              <label htmlFor={supabaseEnabled ? "login-email" : "login-username"}>
+                {supabaseEnabled ? "Email" : "Username"}
+                <input
+                  id={supabaseEnabled ? "login-email" : "login-username"}
+                  type="text"
+                  name={supabaseEnabled ? "email" : "username"}
+                  autoComplete="username"
+                  required
+                  placeholder={supabaseEnabled ? "Enter your email" : "Enter username"}
+>>>>>>> Stashed changes
                 />
               </label>
               
@@ -215,8 +327,35 @@ export default function LoginPage() {
                   style={{ letterSpacing: "0.25rem", textAlign: "center", fontSize: "1.2rem", padding: "1rem" }}
                 />
               </label>
+<<<<<<< Updated upstream
               <button type="submit" className="btn primary" style={{ width: "100%", marginTop: "1rem" }}>
                 Verify & Login
+=======
+              <label htmlFor={supabaseEnabled ? "signup-email" : "signup-username"}>
+                {supabaseEnabled ? "Email" : "Username"}
+                <input
+                  id={supabaseEnabled ? "signup-email" : "signup-username"}
+                  type="text"
+                  name={supabaseEnabled ? "email" : "username"}
+                  autoComplete="username"
+                  required
+                  placeholder={supabaseEnabled ? "Enter your email" : "Choose a username"}
+                />
+              </label>
+              <label htmlFor="signup-password">
+                Password
+                <input
+                  id="signup-password"
+                  type="password"
+                  name="password"
+                  autoComplete="new-password"
+                  required
+                  placeholder="Choose a password (min 6 characters)"
+                />
+              </label>
+              <button type="submit" className="btn primary" style={{ width: "100%" }}>
+                Create account
+>>>>>>> Stashed changes
               </button>
             </form>
             <button 
