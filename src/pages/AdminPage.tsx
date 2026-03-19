@@ -5,6 +5,7 @@ import Footer from "../components/Footer";
 import AdminProductForm from "../components/AdminProductForm";
 import { useProducts } from "../context/ProductsContext";
 import { useMockAutomation } from "../hooks/useMockAutomation";
+import { useAuth } from "../context/AuthContext";
 import type { Product } from "../types";
 
 export default function AdminPage() {
@@ -43,15 +44,7 @@ export default function AdminPage() {
     );
   }, [products, productSearch]);
 
-  const currentUser = useMemo(() => {
-    const stored = localStorage.getItem("summitCurrentUser");
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored) as { username: string; role: string };
-    } catch {
-      return null;
-    }
-  }, []);
+  const { user: currentUser } = useAuth();
 
   const handleSaveProduct = async (p: Product) => {
     try {

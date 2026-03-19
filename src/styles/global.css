@@ -580,6 +580,7 @@ main {
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1959,4 +1960,232 @@ main {
   color: var(--text-muted);
   padding: 2rem;
   text-align: center;
+}
+
+/* ========== Account Dropdown ========== */
+.account-dropdown-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.account-dropdown {
+  position: absolute;
+  top: 100%;
+  right: -20px;
+  width: 330px;
+  background: #1c2128; /* Dark premium background matching site */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  padding: 0.5rem 0 0 0; /* Removing bottom padding for flush logout btn */
+  overflow: hidden; /* Ensure bottom rounded corners show properly */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+}
+
+/* The arrow pointing up */
+.account-dropdown::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  right: 32px;
+  width: 12px;
+  height: 12px;
+  background: #1c2128;
+  border-left: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.account-dropdown-wrapper:hover .account-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(8px);
+}
+
+.account-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+  border-left: 3px solid transparent; /* For Croma style teal line on hover */
+}
+
+.account-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: #00e6b8; /* Croma style teal */
+}
+
+.account-dropdown-item svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.account-dropdown-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.account-dropdown-text strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.1rem;
+}
+
+.account-dropdown-text span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.logout-btn {
+  font-family: inherit;
+  background: #f1f5f9;
+  color: #0f1217;
+  border-radius: 0 0 8px 8px; /* Round the bottom corners */
+  border-left: none; /* remove hover border styling from base item */
+  padding: 1rem 1.25rem;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+  cursor: pointer;
+  border: none;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  text-align: left;
+}
+
+.logout-btn:hover {
+  background: #e2e8f0;
+  border-left-color: transparent;
+}
+
+.logout-btn svg {
+  color: #0f1217; /* Dark icon */
+}
+
+.logout-btn .account-dropdown-text span {
+  color: #475569; /* Darker muted text */
+}
+
+/* ========== Account Form ========== */
+.account-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .account-profile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-field label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.account-field input,
+.account-field select {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.account-field input:focus,
+.account-field select:focus {
+  border-color: #00e6b8; /* teal highlight */
+  outline: none;
+}
+
+.account-field input:read-only {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.account-field select option {
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.gender-options {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.gender-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.gender-option input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+}
+
+.gender-option input[type="radio"]:checked {
+  border-color: #00e6b8;
+}
+
+.gender-option input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  background: #00e6b8;
+  border-radius: 50%;
+}
+
+.account-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.btn-teal {
+  background: #00e6b8;
+  color: #0f1217;
+  border: none;
+  font-weight: 600;
+}
+.btn-teal:hover {
+  background: #00c9a0;
 }

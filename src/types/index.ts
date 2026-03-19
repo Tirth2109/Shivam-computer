@@ -37,10 +37,19 @@ export interface Order {
 }
 
 export interface User {
-  username: string;
-  password: string;
+  username?: string;
+  password?: string;
   role: string;
-  fullName: string;
+  fullName?: string;
+  title?: string;
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  gender?: string;
+  phone?: string;
+  email?: string;
+  dob?: string;
+  anniversary?: string;
 }
 
 export interface AutomationLogEntry {

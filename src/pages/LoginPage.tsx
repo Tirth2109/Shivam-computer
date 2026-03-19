@@ -1,7 +1,9 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { users } from "../data/users";
 import type { User } from "../types";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { useAuth } from "../context/AuthContext";
 
 const REGISTERED_USERS_KEY = "shivam_registered_users";
 
@@ -18,87 +20,142 @@ function getRegisteredUsers(): User[] {
   return [];
 }
 
-function getAllUsers(): User[] {
-  return [...users, ...getRegisteredUsers()];
-}
-
 export default function LoginPage() {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [step, setStep] = useState<1 | 2>(1);
+  const [identifier, setIdentifier] = useState("");
+  const [isEmailType, setIsEmailType] = useState(true);
   const [status, setStatus] = useState("");
   const [statusColor, setStatusColor] = useState("#0b1d40");
+  
   const navigate = useNavigate();
+  const { user, setUser } = useAuth();
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    if (user) {
+      if (user.role === "admin") navigate("/admin");
+      else navigate("/account");
+    }
+  }, [user, navigate]);
+
+  const handleSendOtp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const username = formData.get("username")?.toString().trim() ?? "";
-    const password = formData.get("password")?.toString() ?? "";
-    const match = getAllUsers().find(
-      (user) => user.username === username && user.password === password
-    );
-    if (!match) {
-      setStatus("Credentials do not match our records.");
+    const id = formData.get("identifier")?.toString().trim() ?? "";
+
+    if (id.length < 3) {
+      setStatus("Please enter a valid Email or Phone Number.");
       setStatusColor("#dc2626");
       return;
     }
 
-    localStorage.setItem(
-      "summitCurrentUser",
-      JSON.stringify({ username: match.username, role: match.role })
-    );
-    setStatus("Authenticated! Redirecting to the admin.");
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
+    setIdentifier(id);
+    setIsEmailType(isEmail);
+
+    if (isSupabaseConfigured() && supabase) {
+      setStatus("Sending OTP code...");
+      setStatusColor("#0b1d40");
+      
+      const { error } = await supabase.auth.signInWithOtp(
+        isEmail ? { email: id } : { phone: id }
+      );
+
+      if (error) {
+        setStatus(error.message);
+        setStatusColor("#dc2626");
+        return;
+      }
+      
+      setStatus("Code sent! Check your inbox or messages.");
+      setStatusColor("#059669");
+      setStep(2);
+      return;
+    }
+
+    // Mock Fallback
+    setStatus("Mock mode: Pretend an OTP was sent. Use code '123456' to verify.");
     setStatusColor("#059669");
-    setTimeout(() => {
-      navigate("/admin");
-    }, 800);
+    setStep(2);
   };
 
-  const handleSignUp = (event: FormEvent<HTMLFormElement>) => {
+  const handleVerifyOtp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const username = formData.get("username")?.toString().trim() ?? "";
-    const password = formData.get("password")?.toString() ?? "";
-    const fullName = formData.get("fullName")?.toString().trim() ?? "";
+    const token = formData.get("token")?.toString().trim() ?? "";
 
-    if (username.length < 3) {
-      setStatus("Username must be at least 3 characters.");
-      setStatusColor("#dc2626");
-      return;
-    }
-    if (password.length < 6) {
-      setStatus("Password must be at least 6 characters.");
-      setStatusColor("#dc2626");
-      return;
-    }
-    if (!fullName.trim()) {
-      setStatus("Please enter your full name.");
+    if (token.length < 6) {
+      setStatus("Please enter the 6-digit code.");
       setStatusColor("#dc2626");
       return;
     }
 
-    const all = getAllUsers();
-    if (all.some((u) => u.username.toLowerCase() === username.toLowerCase())) {
-      setStatus("Username already taken. Please choose another.");
+    if (isSupabaseConfigured() && supabase) {
+      setStatus("Verifying code...");
+      setStatusColor("#0b1d40");
+
+      const { error } = await supabase.auth.verifyOtp({
+        email: isEmailType ? identifier : undefined,
+        phone: !isEmailType ? identifier : undefined,
+        token,
+        type: isEmailType ? 'email' : 'sms',
+      });
+
+      if (error) {
+        setStatus(error.message);
+        setStatusColor("#dc2626");
+        return;
+      }
+
+      // Successful Supabase auth will be caught by AuthContext listener, 
+      // but we can manually set user or let context handle it.
+      setStatus("Authenticated! Redirecting...");
+      setStatusColor("#059669");
+      return;
+    }
+
+    // Mock Fallback
+    if (token !== "123456") {
+      setStatus("Invalid mock code. Try 123456.");
       setStatusColor("#dc2626");
       return;
     }
 
-    const newUser: User = {
-      username,
-      password,
-      role: "customer",
-      fullName,
-    };
+    // Create or find mock user
     const registered = getRegisteredUsers();
-    registered.push(newUser);
-    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registered));
+    let match = [...users, ...registered].find(
+      (u) => 
+        (u.username && u.username.toLowerCase() === identifier.toLowerCase()) || 
+        (u.email && u.email === identifier) || 
+        (u.phone && u.phone === identifier)
+    );
 
-    setStatus("Account created! You can now sign in.");
+    if (!match) {
+      match = { 
+        username: identifier, 
+        email: isEmailType ? identifier : undefined, 
+        phone: !isEmailType ? identifier : undefined, 
+        role: "customer" 
+      };
+      registered.push(match);
+      localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registered));
+    }
+
+    const newUserProfile = { 
+      username: match.fullName || match.username || identifier, 
+      role: match.role,
+      email: match.email,
+      phone: match.phone
+    };
+    localStorage.setItem("summitCurrentUser", JSON.stringify(newUserProfile));
+    setUser(newUserProfile);
+    
+    setStatus("Authenticated! Redirecting...");
     setStatusColor("#059669");
-    setMode("login");
-    (form as HTMLFormElement).reset();
+    setTimeout(() => {
+      navigate(match.role === "admin" ? "/admin" : "/account");
+    }, 800);
   };
 
   return (
@@ -117,121 +174,70 @@ export default function LoginPage() {
         </div>
       </div>
       <div className="auth-card">
-        <div className="auth-tabs">
-          <button
-            type="button"
-            className={`auth-tab ${mode === "login" ? "active" : ""}`}
-            onClick={() => {
-              setMode("login");
-              setStatus("");
-            }}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            className={`auth-tab ${mode === "signup" ? "active" : ""}`}
-            onClick={() => {
-              setMode("signup");
-              setStatus("");
-            }}
-          >
-            Sign up
-          </button>
-        </div>
-
-        {mode === "login" ? (
+        {step === 1 ? (
           <>
-            <h1>Login</h1>
-            <p>Sign in to access the Shivam Computer admin dashboard.</p>
-            <form id="login-form" onSubmit={handleLogin}>
-              <label htmlFor="login-username">
-                Username
+            <h1 style={{ marginBottom: "0.5rem" }}>Sign in / Sign up</h1>
+            <p>Access your Shivam Computer account with a single code.</p>
+            <form id="otp-send-form" onSubmit={handleSendOtp} style={{ marginTop: "1.5rem" }}>
+              <label htmlFor="login-identifier">
+                Email or Phone Number
                 <input
-                  id="login-username"
+                  id="login-identifier"
                   type="text"
-                  name="username"
+                  name="identifier"
                   autoComplete="username"
                   required
-                  placeholder="Enter username"
+                  placeholder="Enter email or phone number"
                 />
               </label>
-              <label htmlFor="login-password">
-                Password
-                <input
-                  id="login-password"
-                  type="password"
-                  name="password"
-                  autoComplete="current-password"
-                  required
-                  placeholder="Enter password"
-                />
-              </label>
-              <button type="submit" className="btn primary" style={{ width: "100%" }}>
-                Sign in
+              
+              <button type="submit" className="btn primary" style={{ width: "100%", marginTop: "1rem" }}>
+                Send OTP
               </button>
             </form>
           </>
         ) : (
           <>
-            <h1>Sign up</h1>
-            <p>Create an account to access the Shivam Computer admin dashboard.</p>
-            <form id="signup-form" onSubmit={handleSignUp}>
-              <label htmlFor="signup-fullName">
-                Full name
+            <h1 style={{ marginBottom: "0.5rem" }}>Verify Code</h1>
+            <p>Enter the 6-digit code sent to <strong>{identifier}</strong></p>
+            <form id="otp-verify-form" onSubmit={handleVerifyOtp} style={{ marginTop: "1.5rem" }}>
+              <label htmlFor="otp-token">
+                Authentication Code
                 <input
-                  id="signup-fullName"
+                  id="otp-token"
                   type="text"
-                  name="fullName"
-                  autoComplete="name"
+                  name="token"
                   required
-                  placeholder="Enter your full name"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="123456"
+                  style={{ letterSpacing: "0.25rem", textAlign: "center", fontSize: "1.2rem", padding: "1rem" }}
                 />
               </label>
-              <label htmlFor="signup-username">
-                Username
-                <input
-                  id="signup-username"
-                  type="text"
-                  name="username"
-                  autoComplete="username"
-                  required
-                  placeholder="Choose a username"
-                />
-              </label>
-              <label htmlFor="signup-password">
-                Password
-                <input
-                  id="signup-password"
-                  type="password"
-                  name="password"
-                  autoComplete="new-password"
-                  required
-                  placeholder="Choose a password (min 6 characters)"
-                />
-              </label>
-              <button type="submit" className="btn primary" style={{ width: "100%" }}>
-                Create account
+              <button type="submit" className="btn primary" style={{ width: "100%", marginTop: "1rem" }}>
+                Verify & Login
               </button>
             </form>
+            <button 
+              className="btn outline" 
+              style={{ width: "100%", marginTop: "0.75rem", border: "none", background: "transparent", color: "var(--text-muted)" }}
+              onClick={() => { setStep(1); setStatus(""); }}
+            >
+              ← Back to Email/Phone
+            </button>
           </>
         )}
 
         <p
           id="login-status"
           className="status-message"
-          style={{ color: statusColor }}
+          style={{ color: statusColor, marginTop: "1.5rem" }}
         >
           {status}
         </p>
-        <p className="microcopy">
-          {mode === "login" ? (
-            <>Don&apos;t have an account? <button type="button" className="link-btn" onClick={() => setMode("signup")}>Sign up</button></>
-          ) : (
-            <>Already have an account? <button type="button" className="link-btn" onClick={() => setMode("login")}>Login</button></>
-          )}
-        </p>
-        <p className="microcopy">
+        
+        <p className="microcopy" style={{ marginTop: "1rem" }}>
           <Link to="/">← Back to home</Link>
         </p>
       </div>
