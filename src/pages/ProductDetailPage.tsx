@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
 import WhatsAppFloat from "../components/WhatsAppFloat";
@@ -8,6 +8,7 @@ import { useProducts } from "../context/ProductsContext";
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { addToCart } = useCart();
   const [pincode, setPincode] = useState("");
   const [pincodeResult, setPincodeResult] = useState<"check" | "yes" | "no" | null>(null);
@@ -137,7 +138,7 @@ export default function ProductDetailPage() {
                   className="btn primary"
                   onClick={() => {
                     addToCart(product, quantity);
-                    window.location.href = "/cart";
+                    navigate("/cart");
                   }}
                 >
                   Buy Now

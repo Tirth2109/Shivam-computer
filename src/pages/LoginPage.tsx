@@ -1,14 +1,9 @@
-import { FormEvent, useState, useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { users } from "../data/users";
 import type { User } from "../types";
-<<<<<<< Updated upstream
-import { supabase, isSupabaseConfigured } from "../lib/supabase";
-import { useAuth } from "../context/AuthContext";
-=======
 import { useAuth } from "../context/AuthContext";
 import { isSupabaseConfigured } from "../lib/supabase";
->>>>>>> Stashed changes
 
 const REGISTERED_USERS_KEY = "shivam_registered_users";
 
@@ -25,50 +20,43 @@ function getRegisteredUsers(): User[] {
   return [];
 }
 
+function getAllUsers(): User[] {
+  return [...users, ...getRegisteredUsers()];
+}
+
 export default function LoginPage() {
-  const [step, setStep] = useState<1 | 2>(1);
-  const [identifier, setIdentifier] = useState("");
-  const [isEmailType, setIsEmailType] = useState(true);
+  const supabaseEnabled = isSupabaseConfigured();
+  const { user, loading: authLoading, signInWithPassword, signUp } = useAuth();
+  const navigate = useNavigate();
+
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [status, setStatus] = useState("");
   const [statusColor, setStatusColor] = useState("#0b1d40");
-  
-  const navigate = useNavigate();
-<<<<<<< Updated upstream
-  const { user, setUser } = useAuth();
-=======
-  const supabaseEnabled = isSupabaseConfigured();
-  const { signInWithPassword, signUp } = useAuth();
->>>>>>> Stashed changes
 
   useEffect(() => {
-    if (user) {
-      if (user.role === "admin") navigate("/admin");
-      else navigate("/account");
-    }
-  }, [user, navigate]);
+    if (authLoading) return;
+    if (!user) return;
+    // Admin page is allowed for any signed-in user in this app.
+    navigate("/admin");
+  }, [authLoading, navigate, user]);
 
-  const handleSendOtp = async (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
-<<<<<<< Updated upstream
-    const id = formData.get("identifier")?.toString().trim() ?? "";
 
-    if (id.length < 3) {
-      setStatus("Please enter a valid Email or Phone Number.");
-=======
-    const username = formData.get("username")?.toString().trim() ?? "";
-    const email = formData.get("email")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString() ?? "";
 
     if (supabaseEnabled) {
+      const email = formData.get("email")?.toString().trim() ?? "";
+      if (!email) {
+        setStatus("Please enter your email.");
+        setStatusColor("#dc2626");
+        return;
+      }
+
       void (async () => {
         try {
-          if (!email) {
-            setStatus("Please enter your email.");
-            setStatusColor("#dc2626");
-            return;
-          }
           await signInWithPassword({ email, password });
           setStatus("Signed in! Redirecting to the admin.");
           setStatusColor("#059669");
@@ -82,62 +70,37 @@ export default function LoginPage() {
       return;
     }
 
-    const match = getAllUsers().find(
-      (user) => user.username === username && user.password === password
-    );
+    const username = formData.get("username")?.toString().trim() ?? "";
+    const match = getAllUsers().find((u) => u.username === username && u.password === password);
     if (!match) {
       setStatus("Credentials do not match our records.");
->>>>>>> Stashed changes
       setStatusColor("#dc2626");
       return;
     }
 
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id);
-    setIdentifier(id);
-    setIsEmailType(isEmail);
-
-    if (isSupabaseConfigured() && supabase) {
-      setStatus("Sending OTP code...");
-      setStatusColor("#0b1d40");
-      
-      const { error } = await supabase.auth.signInWithOtp(
-        isEmail ? { email: id } : { phone: id }
-      );
-
-      if (error) {
-        setStatus(error.message);
-        setStatusColor("#dc2626");
-        return;
-      }
-      
-      setStatus("Code sent! Check your inbox or messages.");
-      setStatusColor("#059669");
-      setStep(2);
-      return;
-    }
-
-    // Mock Fallback
-    setStatus("Mock mode: Pretend an OTP was sent. Use code '123456' to verify.");
+    localStorage.setItem(
+      "summitCurrentUser",
+      JSON.stringify({ username: match.username, role: match.role, email: match.username })
+    );
+    setStatus("Authenticated! Redirecting to the admin.");
     setStatusColor("#059669");
-    setStep(2);
+    setTimeout(() => navigate("/admin"), 800);
   };
 
-  const handleVerifyOtp = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSignUp = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-<<<<<<< Updated upstream
-    const token = formData.get("token")?.toString().trim() ?? "";
+    const formData = new FormData(event.currentTarget);
 
-    if (token.length < 6) {
-      setStatus("Please enter the 6-digit code.");
-=======
-    const username = formData.get("username")?.toString().trim() ?? "";
-    const email = formData.get("email")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString() ?? "";
     const fullName = formData.get("fullName")?.toString().trim() ?? "";
 
     if (supabaseEnabled) {
+      const email = formData.get("email")?.toString().trim() ?? "";
+      if (!fullName) {
+        setStatus("Please enter your full name.");
+        setStatusColor("#dc2626");
+        return;
+      }
       if (!email) {
         setStatus("Please enter your email.");
         setStatusColor("#dc2626");
@@ -148,11 +111,7 @@ export default function LoginPage() {
         setStatusColor("#dc2626");
         return;
       }
-      if (!fullName.trim()) {
-        setStatus("Please enter your full name.");
-        setStatusColor("#dc2626");
-        return;
-      }
+
       void (async () => {
         try {
           await signUp({ email, password, fullName });
@@ -161,7 +120,7 @@ export default function LoginPage() {
           );
           setStatusColor("#059669");
           setMode("login");
-          (form as HTMLFormElement).reset();
+          (event.currentTarget as HTMLFormElement).reset();
         } catch (e) {
           const msg = e instanceof Error ? e.message : "Failed to sign up";
           setStatus(msg);
@@ -170,6 +129,8 @@ export default function LoginPage() {
       })();
       return;
     }
+
+    const username = formData.get("username")?.toString().trim() ?? "";
 
     if (username.length < 3) {
       setStatus("Username must be at least 3 characters.");
@@ -183,76 +144,36 @@ export default function LoginPage() {
     }
     if (!fullName.trim()) {
       setStatus("Please enter your full name.");
->>>>>>> Stashed changes
       setStatusColor("#dc2626");
       return;
     }
 
-    if (isSupabaseConfigured() && supabase) {
-      setStatus("Verifying code...");
-      setStatusColor("#0b1d40");
-
-      const { error } = await supabase.auth.verifyOtp({
-        email: isEmailType ? identifier : undefined,
-        phone: !isEmailType ? identifier : undefined,
-        token,
-        type: isEmailType ? 'email' : 'sms',
-      });
-
-      if (error) {
-        setStatus(error.message);
-        setStatusColor("#dc2626");
-        return;
-      }
-
-      // Successful Supabase auth will be caught by AuthContext listener, 
-      // but we can manually set user or let context handle it.
-      setStatus("Authenticated! Redirecting...");
-      setStatusColor("#059669");
-      return;
-    }
-
-    // Mock Fallback
-    if (token !== "123456") {
-      setStatus("Invalid mock code. Try 123456.");
+    const all = getAllUsers();
+    if (
+      all.some(
+        (u) => (u.username ?? "").toLowerCase() === username.toLowerCase()
+      )
+    ) {
+      setStatus("Username already taken. Please choose another.");
       setStatusColor("#dc2626");
       return;
     }
 
-    // Create or find mock user
-    const registered = getRegisteredUsers();
-    let match = [...users, ...registered].find(
-      (u) => 
-        (u.username && u.username.toLowerCase() === identifier.toLowerCase()) || 
-        (u.email && u.email === identifier) || 
-        (u.phone && u.phone === identifier)
-    );
-
-    if (!match) {
-      match = { 
-        username: identifier, 
-        email: isEmailType ? identifier : undefined, 
-        phone: !isEmailType ? identifier : undefined, 
-        role: "customer" 
-      };
-      registered.push(match);
-      localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registered));
-    }
-
-    const newUserProfile = { 
-      username: match.fullName || match.username || identifier, 
-      role: match.role,
-      email: match.email,
-      phone: match.phone
+    const newUser: User = {
+      username,
+      password,
+      role: "customer",
+      fullName,
     };
-    localStorage.setItem("summitCurrentUser", JSON.stringify(newUserProfile));
-    setUser(newUserProfile);
-    
-    setStatus("Authenticated! Redirecting...");
+
+    const registered = getRegisteredUsers();
+    registered.push(newUser);
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registered));
+
+    setStatus("Account created! You can now sign in.");
     setStatusColor("#059669");
-    setTimeout(() => {
-      navigate(match.role === "admin" ? "/admin" : "/account");
-    }, 800);
+    setMode("login");
+    (event.currentTarget as HTMLFormElement).reset();
   };
 
   return (
@@ -266,82 +187,118 @@ export default function LoginPage() {
         <div className="auth-bg-orb auth-bg-orb-5" />
         <div className="auth-bg-pixels">
           {[...Array(20)].map((_, i) => (
-            <span key={i} className="auth-bg-pixel" style={{ animationDelay: `${i * 0.3}s`, left: `${(i * 5) % 100}%`, top: `${(i * 7) % 100}%` }} />
+            <span
+              key={i}
+              className="auth-bg-pixel"
+              style={{
+                animationDelay: `${i * 0.3}s`,
+                left: `${(i * 5) % 100}%`,
+                top: `${(i * 7) % 100}%`,
+              }}
+            />
           ))}
         </div>
       </div>
+
       <div className="auth-card">
-        {step === 1 ? (
+        <div className="auth-tabs">
+          <button
+            type="button"
+            className={`auth-tab ${mode === "login" ? "active" : ""}`}
+            onClick={() => {
+              setMode("login");
+              setStatus("");
+            }}
+          >
+            Login
+          </button>
+          <button
+            type="button"
+            className={`auth-tab ${mode === "signup" ? "active" : ""}`}
+            onClick={() => {
+              setMode("signup");
+              setStatus("");
+            }}
+          >
+            Sign up
+          </button>
+        </div>
+
+        {mode === "login" ? (
           <>
-<<<<<<< Updated upstream
-            <h1 style={{ marginBottom: "0.5rem" }}>Sign in / Sign up</h1>
-            <p>Access your Shivam Computer account with a single code.</p>
-            <form id="otp-send-form" onSubmit={handleSendOtp} style={{ marginTop: "1.5rem" }}>
-              <label htmlFor="login-identifier">
-                Email or Phone Number
-                <input
-                  id="login-identifier"
-                  type="text"
-                  name="identifier"
-                  autoComplete="username"
-                  required
-                  placeholder="Enter email or phone number"
-=======
             <h1>Login</h1>
             <p>Sign in to access the Shivam Computer admin dashboard.</p>
             <form id="login-form" onSubmit={handleLogin}>
-              <label htmlFor={supabaseEnabled ? "login-email" : "login-username"}>
+              <label htmlFor="login-email-or-username">
                 {supabaseEnabled ? "Email" : "Username"}
                 <input
-                  id={supabaseEnabled ? "login-email" : "login-username"}
+                  id="login-email-or-username"
                   type="text"
                   name={supabaseEnabled ? "email" : "username"}
-                  autoComplete="username"
+                  autoComplete={supabaseEnabled ? "email" : "username"}
                   required
                   placeholder={supabaseEnabled ? "Enter your email" : "Enter username"}
->>>>>>> Stashed changes
                 />
               </label>
-              
-              <button type="submit" className="btn primary" style={{ width: "100%", marginTop: "1rem" }}>
-                Send OTP
+              <label htmlFor="login-password">
+                Password
+                <input
+                  id="login-password"
+                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  required
+                  placeholder="Enter password"
+                />
+              </label>
+              <button type="submit" className="btn primary" style={{ width: "100%" }}>
+                Sign in
               </button>
             </form>
           </>
         ) : (
           <>
-            <h1 style={{ marginBottom: "0.5rem" }}>Verify Code</h1>
-            <p>Enter the 6-digit code sent to <strong>{identifier}</strong></p>
-            <form id="otp-verify-form" onSubmit={handleVerifyOtp} style={{ marginTop: "1.5rem" }}>
-              <label htmlFor="otp-token">
-                Authentication Code
+            <h1>Sign up</h1>
+            <p>Create an account to access the Shivam Computer admin dashboard.</p>
+            <form id="signup-form" onSubmit={handleSignUp}>
+              <label htmlFor="signup-fullName">
+                Full name
                 <input
-                  id="otp-token"
+                  id="signup-fullName"
                   type="text"
-                  name="token"
+                  name="fullName"
+                  autoComplete="name"
                   required
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  placeholder="123456"
-                  style={{ letterSpacing: "0.25rem", textAlign: "center", fontSize: "1.2rem", padding: "1rem" }}
+                  placeholder="Enter your full name"
                 />
               </label>
-<<<<<<< Updated upstream
-              <button type="submit" className="btn primary" style={{ width: "100%", marginTop: "1rem" }}>
-                Verify & Login
-=======
-              <label htmlFor={supabaseEnabled ? "signup-email" : "signup-username"}>
-                {supabaseEnabled ? "Email" : "Username"}
-                <input
-                  id={supabaseEnabled ? "signup-email" : "signup-username"}
-                  type="text"
-                  name={supabaseEnabled ? "email" : "username"}
-                  autoComplete="username"
-                  required
-                  placeholder={supabaseEnabled ? "Enter your email" : "Choose a username"}
-                />
-              </label>
+
+              {supabaseEnabled ? (
+                <label htmlFor="signup-email">
+                  Email
+                  <input
+                    id="signup-email"
+                    type="text"
+                    name="email"
+                    autoComplete="email"
+                    required
+                    placeholder="Enter your email"
+                  />
+                </label>
+              ) : (
+                <label htmlFor="signup-username">
+                  Username
+                  <input
+                    id="signup-username"
+                    type="text"
+                    name="username"
+                    autoComplete="username"
+                    required
+                    placeholder="Choose a username"
+                  />
+                </label>
+              )}
+
               <label htmlFor="signup-password">
                 Password
                 <input
@@ -353,33 +310,41 @@ export default function LoginPage() {
                   placeholder="Choose a password (min 6 characters)"
                 />
               </label>
+
               <button type="submit" className="btn primary" style={{ width: "100%" }}>
                 Create account
->>>>>>> Stashed changes
               </button>
             </form>
-            <button 
-              className="btn outline" 
-              style={{ width: "100%", marginTop: "0.75rem", border: "none", background: "transparent", color: "var(--text-muted)" }}
-              onClick={() => { setStep(1); setStatus(""); }}
-            >
-              ← Back to Email/Phone
-            </button>
           </>
         )}
 
-        <p
-          id="login-status"
-          className="status-message"
-          style={{ color: statusColor, marginTop: "1.5rem" }}
-        >
+        <p id="login-status" className="status-message" style={{ color: statusColor }}>
           {status}
         </p>
-        
-        <p className="microcopy" style={{ marginTop: "1rem" }}>
+
+        <p className="microcopy">
+          {mode === "login" ? (
+            <>
+              Don&apos;t have an account?{" "}
+              <button type="button" className="link-btn" onClick={() => setMode("signup")}>
+                Sign up
+              </button>
+            </>
+          ) : (
+            <>
+              Already have an account?{" "}
+              <button type="button" className="link-btn" onClick={() => setMode("login")}>
+                Login
+              </button>
+            </>
+          )}
+        </p>
+
+        <p className="microcopy">
           <Link to="/">← Back to home</Link>
         </p>
       </div>
     </main>
   );
 }
+

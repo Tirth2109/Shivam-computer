@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
@@ -8,9 +8,10 @@ import { useProducts } from "../context/ProductsContext";
 export default function DealsPage() {
   const { addToCart } = useCart();
   const { topDeals } = useProducts();
+  const navigate = useNavigate();
   const handleBuyNow = (p: { id: string }) => {
     addToCart(p as any, 1);
-    window.location.href = "/cart";
+    navigate("/cart");
   };
   return (
     <>

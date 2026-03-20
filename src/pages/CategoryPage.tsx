@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
@@ -36,6 +36,7 @@ export default function CategoryPage() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const category = slug !== "all" ? getCategoryBySlug(slug) : null;
 
@@ -109,7 +110,7 @@ export default function CategoryPage() {
 
   const handleBuyNow = (product: Product) => {
     addToCart(product, 1);
-    window.location.href = "/cart";
+    navigate("/cart");
   };
 
   return (

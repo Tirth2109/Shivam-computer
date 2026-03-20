@@ -6,9 +6,7 @@ import AdminProductForm from "../components/AdminProductForm";
 import { useProducts } from "../context/ProductsContext";
 import { useAuth } from "../context/AuthContext";
 import { useMockAutomation } from "../hooks/useMockAutomation";
-import { useAuth } from "../context/AuthContext";
 import type { Product } from "../types";
-import { isSupabaseConfigured } from "../lib/supabase";
 
 export default function AdminPage() {
   const {
@@ -21,8 +19,11 @@ export default function AdminPage() {
     error,
     useSupabase,
   } = useProducts();
+
   const { orders, logs, runs, simulateOrder, clearOrders, clearAutomationLog } =
     useMockAutomation();
+
+  const { user, loading: authLoading } = useAuth();
 
   const [activeTab, setActiveTab] = useState<"overview" | "products">("overview");
   const [productSearch, setProductSearch] = useState("");
@@ -46,23 +47,38 @@ export default function AdminPage() {
     );
   }, [products, productSearch]);
 
-<<<<<<< Updated upstream
-  const { user: currentUser } = useAuth();
-=======
-  const supabaseEnabled = isSupabaseConfigured();
-  const { user, loading: authLoading } = useAuth();
+  if (authLoading) {
+    return (
+      <>
+        <HeaderWithDeals />
+        <main className="auth-page">
+          <div className="auth-card">
+            <h1>Loading…</h1>
+            <p>Checking your session.</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
-  const currentUser = useMemo(() => {
-    if (supabaseEnabled) return null;
-    const stored = localStorage.getItem("summitCurrentUser");
-    if (!stored) return null;
-    try {
-      return JSON.parse(stored) as { username: string; role: string };
-    } catch {
-      return null;
-    }
-  }, [supabaseEnabled]);
->>>>>>> Stashed changes
+  if (!user) {
+    return (
+      <>
+        <HeaderWithDeals />
+        <main className="auth-page">
+          <div className="auth-card">
+            <h1>Access restricted</h1>
+            <p>Please sign in before visiting the admin dashboard.</p>
+            <Link className="btn primary" to="/login">
+              Go to login
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   const handleSaveProduct = async (p: Product) => {
     try {
@@ -91,57 +107,6 @@ export default function AdminPage() {
       setDeleteConfirm(id);
     }
   };
-
-  if (supabaseEnabled) {
-    if (authLoading) {
-      return (
-        <>
-          <HeaderWithDeals />
-          <main className="auth-page">
-            <div className="auth-card">
-              <h1>Loading…</h1>
-              <p>Checking your session.</p>
-            </div>
-          </main>
-          <Footer />
-        </>
-      );
-    }
-
-    if (!user) {
-      return (
-        <>
-          <HeaderWithDeals />
-          <main className="auth-page">
-            <div className="auth-card">
-              <h1>Access restricted</h1>
-              <p>Please sign in to access the admin dashboard.</p>
-              <Link className="btn primary" to="/login">
-                Go to login
-              </Link>
-            </div>
-          </main>
-          <Footer />
-        </>
-      );
-    }
-  } else if (!currentUser) {
-    return (
-      <>
-        <HeaderWithDeals />
-        <main className="auth-page">
-          <div className="auth-card">
-            <h1>Access restricted</h1>
-            <p>Please log in before visiting the admin dashboard.</p>
-            <Link className="btn primary" to="/login">
-              Go to login
-            </Link>
-          </div>
-        </main>
-        <Footer />
-      </>
-    );
-  }
 
   return (
     <>
@@ -294,7 +259,11 @@ export default function AdminPage() {
                 type="button"
                 className="btn outline"
                 onClick={() => {
-                  if (window.confirm("Reset all products to default list? This cannot be undone.")) {
+                  if (
+                    window.confirm(
+                      "Reset all products to default list? This cannot be undone."
+                    )
+                  ) {
                     void resetToDefault();
                   }
                 }}
@@ -382,3 +351,4 @@ export default function AdminPage() {
     </>
   );
 }
+

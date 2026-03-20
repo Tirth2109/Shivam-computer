@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
 import ProductCard from "../components/ProductCard";
@@ -28,10 +28,11 @@ export default function HomePage() {
   const [featuredTab, setFeaturedTab] = useState<"bestsellers" | "new" | "deals">("bestsellers");
   const { addToCart } = useCart();
   const { bestSellers, newArrivals, topDeals } = useProducts();
+  const navigate = useNavigate();
 
   const handleBuyNow = (product: { id: string }) => {
     addToCart(product as any, 1);
-    window.location.href = "/cart";
+    navigate("/cart");
   };
 
   const featuredProducts =
@@ -56,7 +57,7 @@ export default function HomePage() {
                   to={`/category/${cat.slug}`}
                   className="category-card"
                 >
-                  <span className="cat-icon" aria-hidden>◆</span>
+                  <span className="cat-icon" aria-hidden>{cat.icon ?? "◆"}</span>
                   <span className="cat-name">{cat.name}</span>
                 </Link>
               ))}

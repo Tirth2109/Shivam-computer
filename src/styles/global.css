@@ -503,10 +503,17 @@ main {
 }
 
 .category-card .cat-icon {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 0.5rem;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 0.65rem;
   color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 1.95rem;
+  line-height: 1;
+  border-radius: 999px;
+  background: rgba(88, 166, 255, 0.12);
+  border: 1px solid rgba(88, 166, 255, 0.25);
 }
 
 .category-card .cat-name {
