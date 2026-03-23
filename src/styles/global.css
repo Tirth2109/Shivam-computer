@@ -203,21 +203,7 @@ main {
   gap: 0.5rem;
 }
 
-.header-user-greeting {
-  text-decoration: none;
-  color: var(--text);
-  font-weight: 800;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius);
-  background: var(--bg-section);
-  border: 1px solid var(--border);
-  white-space: nowrap;
-}
 
-.header-user-greeting:hover {
-  color: var(--primary);
-  border-color: var(--primary);
-}
 
 .header-icon-btn {
   display: inline-flex;
@@ -299,6 +285,184 @@ main {
 .header-link.active {
   color: var(--primary);
   background: rgba(37, 99, 235, 0.12);
+}
+
+/* ========== Account Dropdown (Croma Style) ========== */
+.header-account-container {
+  position: relative;
+}
+
+.header-user-wrapper {
+  position: relative;
+  padding-bottom: 0.5rem; /* Bridge for hover gap */
+}
+
+.header-user-greeting {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 600;
+  padding: 0.5rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--bg-section);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  transition: all 0.25s var(--ease-out);
+}
+
+.header-user-greeting .user-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.header-user-wrapper:hover .header-user-greeting {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Dropdown Container */
+.account-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 280px;
+  background: #121212; /* Very dark background like Croma */
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s var(--ease-out);
+  margin-top: 0.5rem;
+}
+
+.header-user-wrapper:hover .account-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-arrow {
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 12px;
+  height: 12px;
+  background: #121212;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  transform: rotate(45deg);
+}
+
+.dropdown-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  color: #fff;
+  transition: all 0.2s;
+  border-right: 3px solid transparent;
+  width: 100%;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-right-color: #00e5d1; /* Croma teal */
+}
+
+.item-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  padding-top: 2px;
+}
+
+.item-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.item-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.item-subtext {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.2;
+}
+
+/* Logout styling */
+.dropdown-logout {
+  background: #1a1a1a;
+  border-top: 1px solid var(--border);
+}
+
+.logout-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.logout-btn .item-title {
+  color: #ff4d4d;
+}
+
+.logout-btn:hover .item-title {
+   color: #ff6666;
+}
+
+/* Logged out specific */
+.dropdown-login-prompt {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.dropdown-login-prompt p {
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dropdown-login-prompt .login-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 0.75rem;
+  background: var(--accent);
+  color: #000;
+}
+
+.dropdown-login-prompt .login-btn:hover {
+  background: #2cd548;
 }
 
 /* ========== Buttons ========== */
@@ -1827,6 +1991,8 @@ main {
   font-size: 1rem;
   width: 100%;
   box-sizing: border-box;
+  background: transparent;
+  color: var(--text);
 }
 
 .auth-card form input:focus {
@@ -1834,6 +2000,16 @@ main {
   border-color: var(--primary);
   box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
 }
+
+/* Global autofill reset */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--card-bg) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+}
+
 
 .auth-card .status-message {
   min-height: 1.5em;
@@ -2141,6 +2317,17 @@ main {
   border-color: #00e6b8; /* teal highlight */
   outline: none;
 }
+
+/* Fix browser autofill white background */
+.account-field input:-webkit-autofill,
+.account-field input:-webkit-autofill:hover, 
+.account-field input:-webkit-autofill:focus, 
+.account-field input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--card-bg) inset !important;
+    -webkit-text-fill-color: var(--text) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 
 .account-field input:read-only {
   opacity: 0.7;

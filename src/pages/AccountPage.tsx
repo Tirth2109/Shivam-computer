@@ -57,18 +57,46 @@ export default function AccountPage() {
   };
 
   const handleDiscard = () => {
-    // Reset to user data
-    setFormData({
-      title: user.title || "",
-      firstName: user.firstName || user.username?.split(" ")[0] || "",
-      middleName: user.middleName || "",
-      lastName: user.lastName || user.username?.split(" ").slice(1).join(" ") || "",
-      gender: user.gender || "",
-      phone: user.phone || "",
-      email: user.email || "",
-      dob: user.dob || "",
-      anniversary: user.anniversary || ""
-    });
+    const clearedData = {
+      title: "",
+      firstName: "",
+      middleName: "",
+      lastName: "",
+      gender: "",
+      phone: "",
+      email: "",
+      dob: "",
+      anniversary: ""
+    };
+    
+    // 1. Clear local form
+    setFormData(clearedData);
+
+    // 2. Clear global user state in AuthContext
+    if (user) {
+      const updatedUser = {
+        ...user,
+        ...clearedData,
+        username: user.email || "User" // Reset username to email or default
+      };
+      setUser(updatedUser);
+      
+      // 3. Clear from local storage persistence
+      localStorage.setItem("summitCurrentUser", JSON.stringify(updatedUser));
+      
+      // Update the mock registration list if it exists
+      const existingStr = localStorage.getItem("shivam_registered_users");
+      if (existingStr) {
+        try {
+          const users = JSON.parse(existingStr);
+          const i = users.findIndex((u: any) => u.email === user.email);
+          if (i !== -1) {
+            users[i] = { ...users[i], ...updatedUser };
+            localStorage.setItem("shivam_registered_users", JSON.stringify(users));
+          }
+        } catch {}
+      }
+    }
   };
 
   const handleSave = (e: FormEvent) => {
