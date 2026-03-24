@@ -32,6 +32,9 @@ export default function LoginPage() {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [status, setStatus] = useState("");
   const [statusColor, setStatusColor] = useState("#0b1d40");
+  const [otpMode, setOtpMode] = useState(false);
+  const [sentOtp, setSentOtp] = useState("");
+  const [otpEmail, setOtpEmail] = useState("");
 
   useEffect(() => {
     if (authLoading) return;
@@ -40,15 +43,68 @@ export default function LoginPage() {
     navigate("/admin");
   }, [authLoading, navigate, user]);
 
+  const handleSendOtp = (emailValue: string) => {
+    if (!emailValue) {
+      setStatus("Enter email first to send OTP.");
+      setStatusColor("#dc2626");
+      return;
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setSentOtp(code);
+    setOtpEmail(emailValue);
+    setStatus(`OTP sent to ${emailValue}. (Demo code: ${code})`);
+    setStatusColor("#059669");
+  };
+
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const formData = new FormData(form);
 
+    const email = formData.get("email")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString() ?? "";
+    const otp = formData.get("otp")?.toString().trim() ?? "";
+
+    if (otpMode) {
+      const emailToCheck = email;
+      if (!emailToCheck) {
+        setStatus("Please enter your email for OTP login.");
+        setStatusColor("#dc2626");
+        return;
+      }
+      if (!sentOtp || otpEmail !== emailToCheck) {
+        setStatus("Please request an OTP first.");
+        setStatusColor("#dc2626");
+        return;
+      }
+      if (otp !== sentOtp) {
+        setStatus("Invalid OTP.");
+        setStatusColor("#dc2626");
+        return;
+      }
+
+      const match = getAllUsers().find((u) => {
+        const userId = (u.email || u.username || "").toLowerCase();
+        return userId === emailToCheck.toLowerCase();
+      });
+      if (!match) {
+        setStatus("User not found for provided email/username.");
+        setStatusColor("#dc2626");
+        return;
+      }
+
+      localStorage.setItem(
+        "summitCurrentUser",
+        JSON.stringify({ username: match.username || emailToCheck, role: match.role, email: match.email || emailToCheck })
+      );
+      setStatus("OTP verified. Redirecting to admin...");
+      setStatusColor("#059669");
+      setTimeout(() => navigate("/admin"), 500);
+      return;
+    }
 
     if (supabaseEnabled) {
-      const email = formData.get("email")?.toString().trim() ?? "";
       if (!email) {
         setStatus("Please enter your email.");
         setStatusColor("#dc2626");
@@ -70,9 +126,19 @@ export default function LoginPage() {
       return;
     }
 
-    const username = formData.get("username")?.toString().trim() ?? "";
-    const match = getAllUsers().find((u) => u.username === username && u.password === password);
-    if (!match) {
+    if (!email) {
+      setStatus("Please enter your email.");
+      setStatusColor("#dc2626");
+      return;
+    }
+
+    const match = getAllUsers().find(
+      (u) =>
+        (u.email && u.email.toLowerCase() === email.toLowerCase()) ||
+        (u.username && u.username.toLowerCase() === email.toLowerCase())
+    );
+
+    if (!match || match.password !== password) {
       setStatus("Credentials do not match our records.");
       setStatusColor("#dc2626");
       return;
@@ -80,7 +146,7 @@ export default function LoginPage() {
 
     localStorage.setItem(
       "summitCurrentUser",
-      JSON.stringify({ username: match.username, role: match.role, email: match.username })
+      JSON.stringify({ username: match.username ?? email, role: match.role, email: match.email ?? email })
     );
     setStatus("Authenticated! Redirecting to the admin.");
     setStatusColor("#059669");
@@ -130,10 +196,10 @@ export default function LoginPage() {
       return;
     }
 
-    const username = formData.get("username")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
 
-    if (username.length < 3) {
-      setStatus("Username must be at least 3 characters.");
+    if (!email) {
+      setStatus("Please enter your email.");
       setStatusColor("#dc2626");
       return;
     }
@@ -151,16 +217,17 @@ export default function LoginPage() {
     const all = getAllUsers();
     if (
       all.some(
-        (u) => (u.username ?? "").toLowerCase() === username.toLowerCase()
+        (u) => (u.email ?? "").toLowerCase() === email.toLowerCase()
       )
     ) {
-      setStatus("Username already taken. Please choose another.");
+      setStatus("Email already registered. Please login or use another email.");
       setStatusColor("#dc2626");
       return;
     }
 
     const newUser: User = {
-      username,
+      username: email,
+      email: email,
       password,
       role: "customer",
       fullName,
@@ -230,27 +297,78 @@ export default function LoginPage() {
             <p>Sign in to access the Shivam Computer admin dashboard.</p>
             <form id="login-form" onSubmit={handleLogin}>
               <label htmlFor="login-email-or-username">
-                {supabaseEnabled ? "Email" : "Username"}
+                Email
                 <input
                   id="login-email-or-username"
-                  type="text"
-                  name={supabaseEnabled ? "email" : "username"}
-                  autoComplete={supabaseEnabled ? "email" : "username"}
+                  type="email"
+                  name="email"
+                  autoComplete="email"
                   required
-                  placeholder={supabaseEnabled ? "Enter your email" : "Enter username"}
+                  placeholder="Enter your email"
                 />
               </label>
-              <label htmlFor="login-password">
-                Password
-                <input
-                  id="login-password"
-                  type="password"
-                  name="password"
-                  autoComplete="current-password"
-                  required
-                  placeholder="Enter password"
-                />
-              </label>
+
+              {!otpMode ? (
+                <label htmlFor="login-password">
+                  Password
+                  <input
+                    id="login-password"
+                    type="password"
+                    name="password"
+                    autoComplete="current-password"
+                    required
+                    placeholder="Enter password"
+                  />
+                </label>
+              ) : (
+                <>
+                  <label htmlFor="login-otp">
+                    OTP
+                    <input
+                      id="login-otp"
+                      type="text"
+                      name="otp"
+                      autoComplete="one-time-code"
+                      pattern="\\d{6}"
+                      maxLength={6}
+                      required
+                      placeholder="Enter 6-digit OTP"
+                    />
+                  </label>
+
+                  <div style={{ marginBottom: "1rem" }}>
+                    <button
+                      type="button"
+                      className="btn outline"
+                      onClick={() => {
+                        const emailField = (document.getElementById("login-email-or-username") as HTMLInputElement)?.value?.trim();
+                        handleSendOtp(emailField);
+                      }}
+                    >
+                      Send OTP
+                    </button>
+                  </div>
+                </>
+              )}
+
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", margin: "0.25rem 0" }}>
+                <button
+                  type="button"
+                  className="btn outline"
+                  onClick={() => {
+                    setOtpMode((prev) => !prev);
+                    setStatus("");
+                  }}
+                >
+                  {otpMode ? "Use Password" : "Use OTP"}
+                </button>
+                {otpMode && sentOtp && otpEmail && (
+                  <span style={{ color: "#059669", fontSize: "0.85rem" }}>
+                    OTP sent to {otpEmail} (demo)
+                  </span>
+                )}
+              </div>
+
               <button type="submit" className="btn primary" style={{ width: "100%" }}>
                 Sign in
               </button>
@@ -273,31 +391,17 @@ export default function LoginPage() {
                 />
               </label>
 
-              {supabaseEnabled ? (
-                <label htmlFor="signup-email">
-                  Email
-                  <input
-                    id="signup-email"
-                    type="text"
-                    name="email"
-                    autoComplete="email"
-                    required
-                    placeholder="Enter your email"
-                  />
-                </label>
-              ) : (
-                <label htmlFor="signup-username">
-                  Username
-                  <input
-                    id="signup-username"
-                    type="text"
-                    name="username"
-                    autoComplete="username"
-                    required
-                    placeholder="Choose a username"
-                  />
-                </label>
-              )}
+              <label htmlFor="signup-email">
+                Email
+                <input
+                  id="signup-email"
+                  type="email"
+                  name="email"
+                  autoComplete="email"
+                  required
+                  placeholder="Enter your email"
+                />
+              </label>
 
               <label htmlFor="signup-password">
                 Password

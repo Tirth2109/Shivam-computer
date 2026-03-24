@@ -164,9 +164,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw error;
       },
       signOut: async () => {
-        if (!supabase) return;
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        if (supabase) {
+          const { error } = await supabase.auth.signOut();
+          if (error) throw error;
+        }
         localStorage.removeItem("summitCurrentUser");
         setUser(null);
         setSession(null);
