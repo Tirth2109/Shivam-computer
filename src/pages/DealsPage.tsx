@@ -16,9 +16,9 @@ export default function DealsPage() {
   return (
     <>
       <HeaderWithDeals />
-      <main className="section">
+      <main className="section" data-reveal>
         <div className="container">
-          <div className="section-heading">
+          <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
             <h2>Top Deals</h2>
             <p>Best discounts on PCs, components and accessories</p>
           </div>

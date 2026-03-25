@@ -28,7 +28,14 @@ type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   signInWithPassword: (args: { email: string; password: string }) => Promise<void>;
-  signUp: (args: { email: string; password: string; fullName?: string }) => Promise<void>;
+  signInWithOtp: (args: { email: string; shouldCreateUser?: boolean }) => Promise<void>;
+  verifyEmailOtp: (args: { email: string; token: string; type: "signup" | "email" }) => Promise<void>;
+  resendSignUpOtp: (args: { email: string }) => Promise<void>;
+  signUp: (args: {
+    email: string;
+    password: string;
+    fullName?: string;
+  }) => Promise<{ requiresEmailVerification: boolean }>;
   signOut: () => Promise<void>;
   logout: () => Promise<void>;
   setUser: (user: UserState | null) => void;
@@ -144,11 +151,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       },
+      signInWithOtp: async ({ email, shouldCreateUser = false }) => {
+        if (!supabase) throw new Error("Supabase not configured");
+        const { error } = await supabase.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser,
+          },
+        });
+        if (error) throw error;
+      },
+      verifyEmailOtp: async ({ email, token, type }) => {
+        if (!supabase) throw new Error("Supabase not configured");
+        const { error } = await supabase.auth.verifyOtp({
+          email,
+          token,
+          type,
+        });
+        if (error) throw error;
+      },
+      resendSignUpOtp: async ({ email }) => {
+        if (!supabase) throw new Error("Supabase not configured");
+        const { error } = await supabase.auth.resend({
+          type: "signup",
+          email,
+        });
+        if (error) throw error;
+      },
       signUp: async ({ email, password, fullName }) => {
         if (!supabase) throw new Error("Supabase not configured");
         const name = (fullName ?? "").trim();
         const split = splitFullName(name);
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -162,6 +196,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
         if (error) throw error;
+        return { requiresEmailVerification: !data.session };
       },
       signOut: async () => {
         if (supabase) {

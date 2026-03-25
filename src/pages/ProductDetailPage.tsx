@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
@@ -13,6 +13,8 @@ export default function ProductDetailPage() {
   const [pincode, setPincode] = useState("");
   const [pincodeResult, setPincodeResult] = useState<"check" | "yes" | "no" | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [isCartPopped, setIsCartPopped] = useState(false);
+  const cartPulseTimerRef = useRef<number | null>(null);
 
   const { products } = useProducts();
   const product = products.find((p) => p.id === id);
@@ -22,6 +24,14 @@ export default function ProductDetailPage() {
     }
     return () => { document.title = "Buy Brand New Computers in India | Shivam Computer"; };
   }, [product]);
+
+  useEffect(() => {
+    return () => {
+      if (cartPulseTimerRef.current != null) {
+        window.clearTimeout(cartPulseTimerRef.current);
+      }
+    };
+  }, []);
 
   if (!product) {
     return (
@@ -47,10 +57,21 @@ export default function ProductDetailPage() {
     }, 500);
   };
 
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    setIsCartPopped(true);
+    if (cartPulseTimerRef.current != null) {
+      window.clearTimeout(cartPulseTimerRef.current);
+    }
+    cartPulseTimerRef.current = window.setTimeout(() => {
+      setIsCartPopped(false);
+    }, 420);
+  };
+
   return (
     <>
       <HeaderWithDeals />
-      <main className="section">
+      <main className="section" data-reveal>
         <div className="container">
           <div className="pdp-layout">
             <div className="pdp-gallery">
@@ -128,16 +149,16 @@ export default function ProductDetailPage() {
               <div className="pdp-actions">
                 <button
                   type="button"
-                  className="btn secondary"
-                  onClick={() => addToCart(product, quantity)}
+                  className={`btn secondary ${isCartPopped ? "cart-action-pop" : ""}`}
+                  onClick={handleAddToCart}
                 >
-                  Add to Cart
+                  {isCartPopped ? "Added!" : "Add to Cart"}
                 </button>
                 <button
                   type="button"
                   className="btn primary"
                   onClick={() => {
-                    addToCart(product, quantity);
+                    handleAddToCart();
                     navigate("/cart");
                   }}
                 >

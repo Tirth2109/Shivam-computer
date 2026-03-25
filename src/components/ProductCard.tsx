@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Product } from "../types";
 
@@ -25,6 +26,28 @@ function Stars({ rating = 0 }: { rating?: number }) {
 
 export default function ProductCard({ product, onAddToCart, onBuyNow }: ProductCardProps) {
   const discount = product.discountPercent ?? 0;
+  const [isAdded, setIsAdded] = useState(false);
+  const resetTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (resetTimerRef.current != null) {
+        window.clearTimeout(resetTimerRef.current);
+      }
+    };
+  }, []);
+
+  const triggerAddToCart = () => {
+    if (!onAddToCart) return;
+    onAddToCart(product);
+    setIsAdded(true);
+    if (resetTimerRef.current != null) {
+      window.clearTimeout(resetTimerRef.current);
+    }
+    resetTimerRef.current = window.setTimeout(() => {
+      setIsAdded(false);
+    }, 420);
+  };
 
   return (
     <article className="product-card">
@@ -53,10 +76,10 @@ export default function ProductCard({ product, onAddToCart, onBuyNow }: ProductC
           {onAddToCart && (
             <button
               type="button"
-              className="btn secondary btn-sm"
-              onClick={() => onAddToCart(product)}
+              className={`btn secondary btn-sm ${isAdded ? "cart-action-pop" : ""}`}
+              onClick={triggerAddToCart}
             >
-              Add to Cart
+              {isAdded ? "Added!" : "Add to Cart"}
             </button>
           )}
           {onBuyNow && (

@@ -6,6 +6,14 @@ import { useAuth } from "../context/AuthContext";
 import { isSupabaseConfigured } from "../lib/supabase";
 
 const REGISTERED_USERS_KEY = "shivam_registered_users";
+const OTP_RESEND_COOLDOWN_MS = 60_000;
+
+type OtpVerificationState = {
+  email: string;
+  type: "signup" | "email";
+  source: "signup" | "login";
+  cooldownUntil: number;
+};
 
 function getRegisteredUsers(): User[] {
   try {
@@ -24,111 +32,134 @@ function getAllUsers(): User[] {
   return [...users, ...getRegisteredUsers()];
 }
 
+function nextCooldown() {
+  return Date.now() + OTP_RESEND_COOLDOWN_MS;
+}
+
 export default function LoginPage() {
   const supabaseEnabled = isSupabaseConfigured();
-  const { user, loading: authLoading, signInWithPassword, signUp } = useAuth();
+  const {
+    user,
+    loading: authLoading,
+    signInWithPassword,
+    signInWithOtp,
+    verifyEmailOtp,
+    resendSignUpOtp,
+    signUp,
+  } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [loginMethod, setLoginMethod] = useState<"password" | "otp">("password");
   const [status, setStatus] = useState("");
   const [statusColor, setStatusColor] = useState("#0b1d40");
-  const [otpMode, setOtpMode] = useState(false);
-  const [sentOtp, setSentOtp] = useState("");
-  const [otpEmail, setOtpEmail] = useState("");
+  const [isBusy, setIsBusy] = useState(false);
+
+  const [verification, setVerification] = useState<OtpVerificationState | null>(null);
+  const [otpToken, setOtpToken] = useState("");
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) return;
-    // Admin page is allowed for any signed-in user in this app.
-    navigate("/admin");
+    // Signed-in users should land on home.
+    navigate("/");
   }, [authLoading, navigate, user]);
 
-  const handleSendOtp = (emailValue: string) => {
-    if (!emailValue) {
-      setStatus("Enter email first to send OTP.");
-      setStatusColor("#dc2626");
-      return;
+  useEffect(() => {
+    if (!verification) return;
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [verification]);
+
+  const clearVerification = () => {
+    setVerification(null);
+    setOtpToken("");
+  };
+
+  const setErrorStatus = (message: string) => {
+    setStatus(message);
+    setStatusColor("#dc2626");
+  };
+
+  const setSuccessStatus = (message: string) => {
+    setStatus(message);
+    setStatusColor("#059669");
+  };
+
+  const toFriendlyAuthError = (error: unknown) => {
+    const message = error instanceof Error ? error.message : "Authentication request failed.";
+    const lower = message.toLowerCase();
+
+    if (lower.includes("error sending confirmation email")) {
+      return "Supabase could not send confirmation email. Set up Custom SMTP in Supabase (Authentication -> Providers -> Email), or disable email confirmation temporarily for local testing.";
+    }
+    if (lower.includes("rate limit")) {
+      return "Too many requests. Wait at least 60 seconds and try again. If this continues, increase Supabase Auth email/OTP rate limits and configure Custom SMTP.";
+    }
+    if (lower.includes("email_address_not_authorized")) {
+      return "This email is not authorized by the default Supabase mailer. Use Custom SMTP or test with an authorized/team email.";
     }
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setSentOtp(code);
-    setOtpEmail(emailValue);
-    setStatus(`OTP sent to ${emailValue}. (Demo code: ${code})`);
-    setStatusColor("#059669");
+    return message;
   };
 
   const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(event.currentTarget);
 
     const email = formData.get("email")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString() ?? "";
-    const otp = formData.get("otp")?.toString().trim() ?? "";
-
-    if (otpMode) {
-      const emailToCheck = email;
-      if (!emailToCheck) {
-        setStatus("Please enter your email for OTP login.");
-        setStatusColor("#dc2626");
-        return;
-      }
-      if (!sentOtp || otpEmail !== emailToCheck) {
-        setStatus("Please request an OTP first.");
-        setStatusColor("#dc2626");
-        return;
-      }
-      if (otp !== sentOtp) {
-        setStatus("Invalid OTP.");
-        setStatusColor("#dc2626");
-        return;
-      }
-
-      const match = getAllUsers().find((u) => {
-        const userId = (u.email || u.username || "").toLowerCase();
-        return userId === emailToCheck.toLowerCase();
-      });
-      if (!match) {
-        setStatus("User not found for provided email/username.");
-        setStatusColor("#dc2626");
-        return;
-      }
-
-      localStorage.setItem(
-        "summitCurrentUser",
-        JSON.stringify({ username: match.username || emailToCheck, role: match.role, email: match.email || emailToCheck })
-      );
-      setStatus("OTP verified. Redirecting to admin...");
-      setStatusColor("#059669");
-      setTimeout(() => navigate("/admin"), 500);
-      return;
-    }
 
     if (supabaseEnabled) {
       if (!email) {
-        setStatus("Please enter your email.");
-        setStatusColor("#dc2626");
+        setErrorStatus("Please enter your email.");
         return;
       }
 
+      if (loginMethod === "otp") {
+        if (isBusy) return;
+        setIsBusy(true);
+        void (async () => {
+          try {
+            await signInWithOtp({ email, shouldCreateUser: false });
+            setSuccessStatus(`We sent an OTP to ${email}. Enter it below to continue.`);
+            setVerification({
+              email,
+              type: "email",
+              source: "login",
+              cooldownUntil: nextCooldown(),
+            });
+            setOtpToken("");
+          } catch (e) {
+            setErrorStatus(toFriendlyAuthError(e));
+          } finally {
+            setIsBusy(false);
+          }
+        })();
+        return;
+      }
+
+      if (isBusy) return;
+      setIsBusy(true);
       void (async () => {
         try {
           await signInWithPassword({ email, password });
-          setStatus("Signed in! Redirecting to the admin.");
-          setStatusColor("#059669");
-          setTimeout(() => navigate("/admin"), 400);
+          setSuccessStatus("Signed in! Redirecting to home.");
+          setTimeout(() => navigate("/"), 400);
         } catch (e) {
-          const msg = e instanceof Error ? e.message : "Failed to sign in";
-          setStatus(msg);
-          setStatusColor("#dc2626");
+          setErrorStatus(toFriendlyAuthError(e));
+        } finally {
+          setIsBusy(false);
         }
       })();
       return;
     }
 
     if (!email) {
-      setStatus("Please enter your email.");
-      setStatusColor("#dc2626");
+      setErrorStatus("Please enter your email.");
       return;
     }
 
@@ -139,8 +170,7 @@ export default function LoginPage() {
     );
 
     if (!match || match.password !== password) {
-      setStatus("Credentials do not match our records.");
-      setStatusColor("#dc2626");
+      setErrorStatus("Credentials do not match our records.");
       return;
     }
 
@@ -148,9 +178,8 @@ export default function LoginPage() {
       "summitCurrentUser",
       JSON.stringify({ username: match.username ?? email, role: match.role, email: match.email ?? email })
     );
-    setStatus("Authenticated! Redirecting to the admin.");
-    setStatusColor("#059669");
-    setTimeout(() => navigate("/admin"), 800);
+    setSuccessStatus("Authenticated! Redirecting to home.");
+    setTimeout(() => navigate("/"), 800);
   };
 
   const handleSignUp = (event: FormEvent<HTMLFormElement>) => {
@@ -159,75 +188,63 @@ export default function LoginPage() {
 
     const password = formData.get("password")?.toString() ?? "";
     const fullName = formData.get("fullName")?.toString().trim() ?? "";
+    const email = formData.get("email")?.toString().trim() ?? "";
+
+    if (!fullName) {
+      setErrorStatus("Please enter your full name.");
+      return;
+    }
+    if (!email) {
+      setErrorStatus("Please enter your email.");
+      return;
+    }
+    if (password.length < 6) {
+      setErrorStatus("Password must be at least 6 characters.");
+      return;
+    }
 
     if (supabaseEnabled) {
-      const email = formData.get("email")?.toString().trim() ?? "";
-      if (!fullName) {
-        setStatus("Please enter your full name.");
-        setStatusColor("#dc2626");
-        return;
-      }
-      if (!email) {
-        setStatus("Please enter your email.");
-        setStatusColor("#dc2626");
-        return;
-      }
-      if (password.length < 6) {
-        setStatus("Password must be at least 6 characters.");
-        setStatusColor("#dc2626");
-        return;
-      }
-
+      if (isBusy) return;
+      setIsBusy(true);
       void (async () => {
         try {
-          await signUp({ email, password, fullName });
-          setStatus(
-            "Account created! Now sign in. (If email confirmation is enabled, please confirm first.)"
-          );
-          setStatusColor("#059669");
-          setMode("login");
+          const { requiresEmailVerification } = await signUp({ email, password, fullName });
+
+          if (requiresEmailVerification) {
+            setSuccessStatus(`Account created. Enter the OTP sent to ${email} to verify your email.`);
+            setMode("login");
+            setLoginMethod("otp");
+            setVerification({
+              email,
+              type: "signup",
+              source: "signup",
+              cooldownUntil: nextCooldown(),
+            });
+            setOtpToken("");
+          } else {
+            setSuccessStatus("Account created and signed in. Redirecting to home.");
+            setTimeout(() => navigate("/"), 400);
+          }
+
           (event.currentTarget as HTMLFormElement).reset();
         } catch (e) {
-          const msg = e instanceof Error ? e.message : "Failed to sign up";
-          setStatus(msg);
-          setStatusColor("#dc2626");
+          setErrorStatus(toFriendlyAuthError(e));
+        } finally {
+          setIsBusy(false);
         }
       })();
       return;
     }
 
-    const email = formData.get("email")?.toString().trim() ?? "";
-
-    if (!email) {
-      setStatus("Please enter your email.");
-      setStatusColor("#dc2626");
-      return;
-    }
-    if (password.length < 6) {
-      setStatus("Password must be at least 6 characters.");
-      setStatusColor("#dc2626");
-      return;
-    }
-    if (!fullName.trim()) {
-      setStatus("Please enter your full name.");
-      setStatusColor("#dc2626");
-      return;
-    }
-
     const all = getAllUsers();
-    if (
-      all.some(
-        (u) => (u.email ?? "").toLowerCase() === email.toLowerCase()
-      )
-    ) {
-      setStatus("Email already registered. Please login or use another email.");
-      setStatusColor("#dc2626");
+    if (all.some((u) => (u.email ?? "").toLowerCase() === email.toLowerCase())) {
+      setErrorStatus("Email already registered. Please login or use another email.");
       return;
     }
 
     const newUser: User = {
       username: email,
-      email: email,
+      email,
       password,
       role: "customer",
       fullName,
@@ -237,11 +254,79 @@ export default function LoginPage() {
     registered.push(newUser);
     localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(registered));
 
-    setStatus("Account created! You can now sign in.");
-    setStatusColor("#059669");
+    setSuccessStatus("Account created! You can now sign in.");
     setMode("login");
     (event.currentTarget as HTMLFormElement).reset();
   };
+
+  const handleVerifyOtp = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!verification) {
+      setErrorStatus("No OTP verification is currently pending.");
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const token = formData.get("otp")?.toString().trim() ?? "";
+
+    if (!/^\d{6,8}$/.test(token)) {
+      setErrorStatus("Please enter the OTP from email (6 to 8 digits).");
+      return;
+    }
+
+    if (isBusy) return;
+    setIsBusy(true);
+    void (async () => {
+      try {
+        await verifyEmailOtp({
+          email: verification.email,
+          token,
+          type: verification.type,
+        });
+        setSuccessStatus("Email verified successfully. Redirecting to home.");
+        clearVerification();
+        setTimeout(() => navigate("/"), 400);
+      } catch (e) {
+        setErrorStatus(toFriendlyAuthError(e));
+      } finally {
+        setIsBusy(false);
+      }
+    })();
+  };
+
+  const handleResendOtp = () => {
+    if (!verification || isBusy) return;
+    const secondsLeft = Math.ceil((verification.cooldownUntil - Date.now()) / 1000);
+    if (secondsLeft > 0) return;
+
+    setIsBusy(true);
+    void (async () => {
+      try {
+        if (verification.type === "signup") {
+          await resendSignUpOtp({ email: verification.email });
+        } else {
+          await signInWithOtp({ email: verification.email, shouldCreateUser: false });
+        }
+        setVerification((prev) =>
+          prev
+            ? {
+                ...prev,
+                cooldownUntil: nextCooldown(),
+              }
+            : prev
+        );
+        setSuccessStatus(`A new OTP has been sent to ${verification.email}.`);
+      } catch (e) {
+        setErrorStatus(toFriendlyAuthError(e));
+      } finally {
+        setIsBusy(false);
+      }
+    })();
+  };
+
+  const secondsUntilResend = verification
+    ? Math.max(0, Math.ceil((verification.cooldownUntil - nowMs) / 1000))
+    : 0;
 
   return (
     <main className="auth-page auth-page-standalone auth-page-game-bg" role="main">
@@ -275,6 +360,7 @@ export default function LoginPage() {
             onClick={() => {
               setMode("login");
               setStatus("");
+              clearVerification();
             }}
           >
             Login
@@ -285,16 +371,90 @@ export default function LoginPage() {
             onClick={() => {
               setMode("signup");
               setStatus("");
+              clearVerification();
             }}
           >
             Sign up
           </button>
         </div>
 
-        {mode === "login" ? (
+        {supabaseEnabled && verification ? (
+          <>
+            <h1>Verify email</h1>
+            <p>
+              {verification.source === "signup"
+                ? `Enter the code sent to ${verification.email} to complete signup.`
+                : `Enter the code sent to ${verification.email} to login.`}
+            </p>
+            <form id="otp-form" onSubmit={handleVerifyOtp} noValidate>
+              <label htmlFor="otp-code">
+                OTP code
+                <input
+                  id="otp-code"
+                  type="text"
+                  name="otp"
+                  autoComplete="one-time-code"
+                  inputMode="numeric"
+                  maxLength={8}
+                  required
+                  placeholder="Enter 6 to 8 digit OTP"
+                  value={otpToken}
+                  onChange={(event) => setOtpToken(event.target.value.replace(/\D/g, "").slice(0, 8))}
+                />
+              </label>
+              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+                {isBusy ? "Verifying..." : "Verify code"}
+              </button>
+              <button
+                type="button"
+                className="btn outline"
+                style={{ width: "100%", marginTop: "0.75rem" }}
+                onClick={handleResendOtp}
+                disabled={isBusy || secondsUntilResend > 0}
+              >
+                {secondsUntilResend > 0 ? `Resend in ${secondsUntilResend}s` : "Resend OTP"}
+              </button>
+            </form>
+            <p className="microcopy">
+              Wrong email?{" "}
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => {
+                  clearVerification();
+                  setStatus("");
+                }}
+              >
+                Start again
+              </button>
+            </p>
+          </>
+        ) : mode === "login" ? (
           <>
             <h1>Login</h1>
-            <p>Sign in to access the Shivam Computer admin dashboard.</p>
+            <p>Sign in to continue to the Shivam Computer home page.</p>
+
+            {supabaseEnabled && (
+              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+                <button
+                  type="button"
+                  className="btn outline"
+                  onClick={() => setLoginMethod("password")}
+                  style={{ opacity: loginMethod === "password" ? 1 : 0.7 }}
+                >
+                  Password
+                </button>
+                <button
+                  type="button"
+                  className="btn outline"
+                  onClick={() => setLoginMethod("otp")}
+                  style={{ opacity: loginMethod === "otp" ? 1 : 0.7 }}
+                >
+                  Email OTP
+                </button>
+              </div>
+            )}
+
             <form id="login-form" onSubmit={handleLogin}>
               <label htmlFor="login-email-or-username">
                 Email
@@ -308,7 +468,7 @@ export default function LoginPage() {
                 />
               </label>
 
-              {!otpMode ? (
+              {(!supabaseEnabled || loginMethod === "password") && (
                 <label htmlFor="login-password">
                   Password
                   <input
@@ -320,64 +480,23 @@ export default function LoginPage() {
                     placeholder="Enter password"
                   />
                 </label>
-              ) : (
-                <>
-                  <label htmlFor="login-otp">
-                    OTP
-                    <input
-                      id="login-otp"
-                      type="text"
-                      name="otp"
-                      autoComplete="one-time-code"
-                      pattern="\\d{6}"
-                      maxLength={6}
-                      required
-                      placeholder="Enter 6-digit OTP"
-                    />
-                  </label>
-
-                  <div style={{ marginBottom: "1rem" }}>
-                    <button
-                      type="button"
-                      className="btn outline"
-                      onClick={() => {
-                        const emailField = (document.getElementById("login-email-or-username") as HTMLInputElement)?.value?.trim();
-                        handleSendOtp(emailField);
-                      }}
-                    >
-                      Send OTP
-                    </button>
-                  </div>
-                </>
               )}
 
-              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", margin: "0.25rem 0" }}>
-                <button
-                  type="button"
-                  className="btn outline"
-                  onClick={() => {
-                    setOtpMode((prev) => !prev);
-                    setStatus("");
-                  }}
-                >
-                  {otpMode ? "Use Password" : "Use OTP"}
-                </button>
-                {otpMode && sentOtp && otpEmail && (
-                  <span style={{ color: "#059669", fontSize: "0.85rem" }}>
-                    OTP sent to {otpEmail} (demo)
-                  </span>
-                )}
-              </div>
-
-              <button type="submit" className="btn primary" style={{ width: "100%" }}>
-                Sign in
+              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+                {supabaseEnabled && loginMethod === "otp"
+                  ? isBusy
+                    ? "Sending OTP..."
+                    : "Send OTP"
+                  : isBusy
+                    ? "Signing in..."
+                    : "Sign in"}
               </button>
             </form>
           </>
         ) : (
           <>
             <h1>Sign up</h1>
-            <p>Create an account to access the Shivam Computer admin dashboard.</p>
+            <p>Create an account and continue to the Shivam Computer home page.</p>
             <form id="signup-form" onSubmit={handleSignUp}>
               <label htmlFor="signup-fullName">
                 Full name
@@ -415,8 +534,8 @@ export default function LoginPage() {
                 />
               </label>
 
-              <button type="submit" className="btn primary" style={{ width: "100%" }}>
-                Create account
+              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+                {isBusy ? "Creating account..." : "Create account"}
               </button>
             </form>
           </>
@@ -430,14 +549,28 @@ export default function LoginPage() {
           {mode === "login" ? (
             <>
               Don&apos;t have an account?{" "}
-              <button type="button" className="link-btn" onClick={() => setMode("signup")}>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => {
+                  setMode("signup");
+                  clearVerification();
+                }}
+              >
                 Sign up
               </button>
             </>
           ) : (
             <>
               Already have an account?{" "}
-              <button type="button" className="link-btn" onClick={() => setMode("login")}>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => {
+                  setMode("login");
+                  clearVerification();
+                }}
+              >
                 Login
               </button>
             </>
@@ -451,4 +584,3 @@ export default function LoginPage() {
     </main>
   );
 }
-

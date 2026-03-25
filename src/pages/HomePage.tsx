@@ -44,18 +44,20 @@ export default function HomePage() {
       <HeaderWithDeals />
       <main>
         {/* Shop by Category */}
-        <section className="section section-alt">
+        <section className="section section-alt" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "60ms" }}>
               <h2>Shop by Category</h2>
               <p>Find desktops, components, laptops, and more</p>
             </div>
             <div className="category-grid">
-              {categories.map((cat) => (
+              {categories.map((cat, i) => (
                 <Link
                   key={cat.id}
                   to={`/category/${cat.slug}`}
                   className="category-card"
+                  data-reveal
+                  style={{ transitionDelay: `${100 + i * 45}ms` }}
                 >
                   <span className="cat-icon" aria-hidden>{cat.icon ?? "◆"}</span>
                   <span className="cat-name">{cat.name}</span>
@@ -66,13 +68,13 @@ export default function HomePage() {
         </section>
 
         {/* Featured: Best Sellers / New Arrivals / Top Deals */}
-        <section className="section">
+        <section className="section" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
               <h2>Featured Products</h2>
               <p>Best sellers, new arrivals, and top deals</p>
             </div>
-            <div className="tabs-header">
+            <div className="tabs-header" data-reveal style={{ transitionDelay: "90ms" }}>
               <button
                 type="button"
                 className={`tab-btn ${featuredTab === "bestsellers" ? "active" : ""}`}
@@ -109,33 +111,33 @@ export default function HomePage() {
         </section>
 
         {/* Custom Build PC */}
-        <section className="section">
+        <section className="section" data-reveal>
           <div className="container">
             <div className="custom-build-section">
-              <h2>Build Your Custom PC</h2>
+              <h2 data-reveal style={{ transitionDelay: "30ms" }}>Build Your Custom PC</h2>
               <div className="custom-build-steps">
-                <div className="custom-build-step">
+                <div className="custom-build-step" data-reveal style={{ transitionDelay: "90ms" }}>
                   <div className="step-num">1</div>
                   <p className="step-title">Choose your budget</p>
                 </div>
-                <div className="custom-build-step">
+                <div className="custom-build-step" data-reveal style={{ transitionDelay: "130ms" }}>
                   <div className="step-num">2</div>
                   <p className="step-title">Select purpose (Gaming / Office / Editing)</p>
                 </div>
-                <div className="custom-build-step">
+                <div className="custom-build-step" data-reveal style={{ transitionDelay: "170ms" }}>
                   <div className="step-num">3</div>
                   <p className="step-title">Pick parts (guided compatibility)</p>
                 </div>
-                <div className="custom-build-step">
+                <div className="custom-build-step" data-reveal style={{ transitionDelay: "210ms" }}>
                   <div className="step-num">4</div>
                   <p className="step-title">Get assembled & tested</p>
                 </div>
-                <div className="custom-build-step">
+                <div className="custom-build-step" data-reveal style={{ transitionDelay: "250ms" }}>
                   <div className="step-num">5</div>
                   <p className="step-title">Delivered to your doorstep</p>
                 </div>
               </div>
-              <div className="custom-build-cta">
+              <div className="custom-build-cta" data-reveal style={{ transitionDelay: "300ms" }}>
                 <Link to="/custom-build" className="btn">
                   Start Custom Build
                 </Link>
@@ -145,9 +147,9 @@ export default function HomePage() {
         </section>
 
         {/* Popular Brands - logos scrolling right to left */}
-        <section className="section section-alt">
+        <section className="section section-alt" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
               <h2>Popular Brands</h2>
             </div>
             <BrandsMarquee />
@@ -155,15 +157,20 @@ export default function HomePage() {
         </section>
 
         {/* Why Shivam Computer */}
-        <section className="section">
+        <section className="section" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
               <h2>Why Shivam Computer</h2>
               <p>Your trusted partner for PCs and components</p>
             </div>
             <div className="trust-grid">
-              {TRUST_ITEMS.map((item) => (
-                <div key={item.title} className="trust-card">
+              {TRUST_ITEMS.map((item, i) => (
+                <div
+                  key={item.title}
+                  className="trust-card"
+                  data-reveal
+                  style={{ transitionDelay: `${80 + i * 35}ms` }}
+                >
                   <div className="icon">{item.icon}</div>
                   <h4>{item.title}</h4>
                   <p>{item.text}</p>
@@ -174,15 +181,20 @@ export default function HomePage() {
         </section>
 
         {/* Reviews */}
-        <section className="section section-alt">
+        <section className="section section-alt" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
               <h2>Customer Reviews</h2>
               <p>What our customers say</p>
             </div>
             <div className="reviews-grid">
               {REVIEWS.map((review, i) => (
-                <div key={i} className="review-card">
+                <div
+                  key={i}
+                  className="review-card"
+                  data-reveal
+                  style={{ transitionDelay: `${90 + i * 55}ms` }}
+                >
                   <div className="stars">{"★".repeat(review.stars)}</div>
                   {review.verified && <div className="verified">✓ Verified Purchase</div>}
                   <p>{review.text}</p>

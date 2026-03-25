@@ -117,9 +117,9 @@ export default function CategoryPage() {
     <>
       <HeaderWithDeals />
       <main>
-        <div className="section">
+        <div className="section" data-reveal>
           <div className="container">
-            <div className="section-heading">
+            <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
               <h2>
                 {slug === "components"
                   ? "Computer Components"

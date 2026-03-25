@@ -23,8 +23,9 @@ export default function DealsStrip() {
   return (
     <div className="deals-slideshow-wrap">
       <Link
+        key={deal.id}
         to={`/product/${deal.id}`}
-        className="deals-slide"
+        className="deals-slide hero-entrance"
         aria-label={`Deal: ${deal.name}`}
       >
         <div className="deals-slide-bg" />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -10,6 +10,27 @@ export default function SiteHeader() {
   const { count } = useCart();
   const { user, loading: authLoading, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [cartPulse, setCartPulse] = useState(false);
+  const cartPulseTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (count <= 0) return;
+    setCartPulse(true);
+    if (cartPulseTimerRef.current != null) {
+      window.clearTimeout(cartPulseTimerRef.current);
+    }
+    cartPulseTimerRef.current = window.setTimeout(() => {
+      setCartPulse(false);
+    }, 420);
+  }, [count]);
+
+  useEffect(() => {
+    return () => {
+      if (cartPulseTimerRef.current != null) {
+        window.clearTimeout(cartPulseTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,7 +263,11 @@ export default function SiteHeader() {
                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
               />
             </svg>
-            {count > 0 && <span className="cart-count">{count > 99 ? "99+" : count}</span>}
+            {count > 0 && (
+              <span className={`cart-count ${cartPulse ? "cart-count-pop" : ""}`}>
+                {count > 99 ? "99+" : count}
+              </span>
+            )}
           </Link>
         </div>
       </div>
