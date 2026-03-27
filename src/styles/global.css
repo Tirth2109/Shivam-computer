@@ -424,6 +424,10 @@ main {
   overflow: hidden;
 }
 
+.dropdown-menu .dropdown-item:last-of-type {
+  border-bottom: none;
+}
+
 .dropdown-item {
   display: flex;
   align-items: flex-start;
@@ -475,8 +479,8 @@ main {
 
 /* Logout styling */
 .dropdown-logout {
-  background: #1a1a1a;
-  border-top: 1px solid var(--border);
+  background: linear-gradient(180deg, #111 0%, #181818 100%);
+  border-top: none; /* remove the divider gap line */
 }
 
 .logout-btn {
@@ -484,14 +488,25 @@ main {
   border: none;
   cursor: pointer;
   font-family: inherit;
+  width: 100%;
+  text-align: left;
+  padding: 0.75rem 1rem;
 }
 
 .logout-btn .item-title {
-  color: #ff4d4d;
+  color: #ff3b30;
+}
+
+.logout-btn .item-subtext {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .logout-btn:hover .item-title {
-   color: #ff6666;
+   color: #ff6b6b;
+}
+
+.logout-btn:hover .item-subtext {
+   color: rgba(255, 255, 255, 0.85);
 }
 
 /* Logged out specific */
@@ -2424,6 +2439,33 @@ input:-webkit-autofill:active {
 
 .logout-btn .account-dropdown-text span {
   color: #475569; /* Darker muted text */
+}
+
+/* Stronger override for dropdown logout row in header menu */
+.dropdown-logout .logout-btn {
+  background: #111 !important;
+  color: #fff !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+.dropdown-logout .logout-btn .item-title {
+  color: #ff3b30 !important;
+}
+
+.dropdown-logout .logout-btn .item-subtext {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dropdown-logout .logout-btn:hover {
+  background: rgba(255, 59, 48, 0.15) !important;
+}
+
+.dropdown-logout .logout-btn:hover .item-title {
+  color: #ff6b6b !important;
+}
+
+.dropdown-logout .logout-btn:hover .item-subtext {
+  color: rgba(255, 255, 255, 0.95) !important;
 }
 
 /* ========== Account Form ========== */

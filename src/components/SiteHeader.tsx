@@ -165,7 +165,7 @@ export default function SiteHeader() {
                         type="button"
                         className="dropdown-item logout-btn"
                         onClick={() => {
-                          void signOut().finally(() => navigate("/login"));
+                          void signOut();
                         }}
                       >
                         <div className="item-icon">
@@ -174,7 +174,8 @@ export default function SiteHeader() {
                           </svg>
                         </div>
                         <div className="item-text">
-                           <span className="item-title">Login</span>
+                           <span className="item-title">Logout</span>
+                           <span className="item-subtext">Sign out of your account</span>
                         </div>
                       </button>
                     </li>
