@@ -27,6 +27,7 @@
   --heading-font: "Poppins", "Inter", sans-serif;
   --radius: 12px;
   --radius-btn: 999px;
+  --header-height: 112px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 }
@@ -1061,7 +1062,8 @@ main {
 .deals-slideshow-wrap {
   position: relative;
   width: 100%;
-  min-height: 100vh;
+  height: calc(100vh - var(--header-height));
+  min-height: 480px;
   overflow: hidden;
   background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1e293b 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -1073,8 +1075,8 @@ main {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 100vh;
-  padding: 2rem;
+  height: 100%;
+  padding: 1.5rem 2rem;
   text-decoration: none;
   color: #fff;
   box-sizing: border-box;
@@ -1121,19 +1123,20 @@ main {
 .deals-slide-content {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  justify-content: center;
-  gap: 3rem;
-  max-width: 1100px;
+  gap: 4rem;
+  max-width: 1280px;
   width: 100%;
 }
 
 .deals-slide-image {
   position: relative;
-  width: 320px;
-  height: 320px;
+  width: 380px;
+  height: 380px;
   flex-shrink: 0;
+  justify-self: end;
   border-radius: 16px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.08);
@@ -1166,7 +1169,35 @@ main {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-self: start;
   gap: 0.75rem;
+  max-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .deals-slideshow-wrap, .deals-slide {
+    height: auto;
+    min-height: 580px;
+    padding: 3rem 1.25rem 4rem;
+  }
+  .deals-slide-content {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+  .deals-slide-image {
+    width: 260px;
+    height: 260px;
+    justify-self: center;
+  }
+  .deals-slide-body {
+    align-items: center;
+    justify-self: center;
+  }
+  .deals-slideshow-dots {
+    bottom: 1.25rem;
+  }
 }
 
 .deals-slide-category {
