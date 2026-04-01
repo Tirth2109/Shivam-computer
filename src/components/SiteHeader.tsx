@@ -72,13 +72,13 @@ const loggedOutItems: MenuItem[] = [
 
 function DropdownLink({ item }: { item: MenuItem }) {
   return (
-    <li>
+    <li className="list-none">
       <Link
         to={item.to}
-        className="flex items-start gap-3 px-3 py-2 text-sm transition hover:bg-white/5"
+        className="flex items-center gap-4 px-4 py-2.5 text-sm transition hover:bg-white/5"
       >
-        <div className="mt-0.5 text-[#b4c1d3]">
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="text-[#b4c1d3]">
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
           </svg>
         </div>
@@ -193,28 +193,31 @@ export default function SiteHeader() {
                   <span className="hidden sm:inline">Hi {displayName}</span>
                 </Link>
 
-                <div className="invisible absolute right-0 top-full z-50 w-[320px] pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div className="invisible absolute right-0 top-full z-50 w-[380px] pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                   <div className="overflow-hidden rounded-xl border border-[#2a3f5d] bg-[#0f1625] shadow-xl">
-                    <ul className="max-h-[420px] overflow-auto py-1">
+                    <ul className="py-2 list-none m-0 p-0">
                       {accountItems.map((item) => (
                         <DropdownLink key={item.to} item={item} />
                       ))}
-                      <li className="border-t border-[#2a3f5d]">
+                      <li className="border-t border-[#2a3f5d] mt-1 pt-1 list-none">
                         <button
                           type="button"
-                          className="flex w-full items-start gap-3 px-3 py-2 text-left text-sm transition hover:bg-[#f87171]/10"
+                          className="flex w-full items-center gap-4 bg-transparent px-4 py-2.5 text-left text-sm transition border-none outline-none hover:bg-white/5 focus:outline-none"
                           onClick={() => {
                             void signOut();
                           }}
                         >
-                          <div className="mt-0.5 text-[#f87171]">
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 17l-4 4m0 0l-4-4m4 4V3" />
+                          <div className="text-[#b4c1d3]">
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-medium text-[#fca5a5]">Logout</span>
-                            <span className="text-xs text-[#fca5a5]">Sign out of your account</span>
+
+
+
+                            <span className="font-medium text-[#ecf3ff]">Logout</span>
+                            <span className="text-xs text-[#a8b6ca]">Sign out of your account</span>
                           </div>
                         </button>
                       </li>
