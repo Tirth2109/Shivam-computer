@@ -33,13 +33,11 @@ export default function FooterKids3D() {
   const handlePointerUp = useCallback(() => setIsDragging(false), []);
 
   return (
-    <section className="footer-kids-3d">
-      <h4 className="footer-kids-3d-title">🎮 Kids Corner — 3D Cartoon</h4>
-      <p className="footer-kids-3d-hint">
-        Drag to rotate: a kid playing a game on the computer! 👧👦
-      </p>
+    <section className="rounded-2xl border border-[#2a3f5d] bg-[#111b2c] p-5">
+      <h4 className="text-lg font-semibold text-[#ecf3ff]">Kids Corner - 3D Cartoon</h4>
+      <p className="mt-1 text-sm text-[#a8b6ca]">Drag to rotate the mini gaming cube.</p>
       <div
-        className="footer-kids-3d-scene cartoon-scene"
+        className="mx-auto mt-4 h-56 w-full max-w-md cursor-grab [perspective:1000px] active:cursor-grabbing"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -48,47 +46,39 @@ export default function FooterKids3D() {
         aria-label="Interactive 3D cartoon scene - kid playing game on computer"
       >
         <div
-          className="cartoon-stage"
-          style={{
-            transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
-          }}
+          className="relative mx-auto h-44 w-44 [transform-style:preserve-3d]"
+          style={{ transform: `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)` }}
         >
-          <div className="cartoon-diorama">
-            {/* Back face */}
-            <div className="diorama-face diorama-back" />
-            {/* Left face */}
-            <div className="diorama-face diorama-left" />
-            {/* Right face */}
-            <div className="diorama-face diorama-right" />
-            {/* Top face */}
-            <div className="diorama-face diorama-top" />
-            {/* Bottom face */}
-            <div className="diorama-face diorama-bottom" />
-            {/* Front face: cartoon scene - kid at computer playing game */}
-            <div className="diorama-face diorama-front">
-              <div className="cartoon-art">
-                <div className="cartoon-room">
-                  <div className="cartoon-desk" />
-                  <div className="cartoon-monitor">
-                    <div className="monitor-frame">
-                      <div className="monitor-screen">
-                        <div className="game-screen">
-                          <div className="game-character" />
-                          <span className="game-text">GAME!</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="cartoon-kid">
-                    <div className="kid-head" />
-                    <div className="kid-body" />
-                    <div className="kid-arm kid-arm-left" />
-                    <div className="kid-arm kid-arm-right" />
-                  </div>
-                </div>
-              </div>
+          <div
+            className="absolute inset-0 flex items-center justify-center rounded-xl border border-[#324660] bg-[#0f1629]"
+            style={{ transform: "translateZ(72px)" }}
+          >
+            <div className="text-center">
+              <div className="text-4xl">🧒</div>
+              <div className="text-xl">🖥️</div>
+              <div className="mt-1 text-xs font-semibold text-[#5ec7ff]">GAME!</div>
             </div>
           </div>
+          <div
+            className="absolute inset-0 rounded-xl border border-[#324660] bg-[#131c33]"
+            style={{ transform: "translateZ(-72px) rotateY(180deg)" }}
+          />
+          <div
+            className="absolute inset-0 rounded-xl border border-[#324660] bg-[#0f1625]"
+            style={{ transform: "rotateY(90deg) translateZ(72px)" }}
+          />
+          <div
+            className="absolute inset-0 rounded-xl border border-[#324660] bg-[#0f1625]"
+            style={{ transform: "rotateY(-90deg) translateZ(72px)" }}
+          />
+          <div
+            className="absolute inset-0 rounded-xl border border-[#324660] bg-[#0f1625]"
+            style={{ transform: "rotateX(90deg) translateZ(72px)" }}
+          />
+          <div
+            className="absolute inset-0 rounded-xl border border-[#324660] bg-[#0f1625]"
+            style={{ transform: "rotateX(-90deg) translateZ(72px)" }}
+          />
         </div>
       </div>
     </section>

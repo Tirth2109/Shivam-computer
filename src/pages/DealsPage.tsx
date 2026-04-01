@@ -16,13 +16,13 @@ export default function DealsPage() {
   return (
     <>
       <HeaderWithDeals />
-      <main className="section" data-reveal>
-        <div className="container">
-          <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
-            <h2>Top Deals</h2>
-            <p>Best discounts on PCs, components and accessories</p>
+      <main className="py-10" data-reveal>
+        <div className="mx-auto w-full max-w-6xl px-5">
+          <div className="mb-6" data-reveal style={{ transitionDelay: "50ms" }}>
+            <h2 className="text-2xl font-semibold text-[#ecf3ff]">Top Deals</h2>
+            <p className="mt-1 text-sm text-[#a8b6ca]">Best discounts on PCs, components and accessories</p>
           </div>
-          <div className="product-grid">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {topDeals.map((product) => (
               <ProductCard
                 key={product.id}

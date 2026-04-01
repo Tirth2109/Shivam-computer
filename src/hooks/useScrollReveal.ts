@@ -28,8 +28,9 @@ export function useScrollReveal(routeKey: string) {
         });
       },
       {
-        threshold: 0.12,
-        rootMargin: "0px 0px -8% 0px",
+        // A low threshold ensures very tall containers still reveal on small screens.
+        threshold: 0.01,
+        rootMargin: "0px 0px -4% 0px",
       }
     );
 
@@ -41,4 +42,3 @@ export function useScrollReveal(routeKey: string) {
     return () => observer.disconnect();
   }, [routeKey]);
 }
-

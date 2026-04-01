@@ -1,4 +1,5 @@
 import type { Product } from "../types";
+import ProductCard from "./ProductCard";
 
 type ProductGridProps = {
   products: Product[];
@@ -7,33 +8,14 @@ type ProductGridProps = {
 
 export default function ProductGrid({ products, onBuy }: ProductGridProps) {
   return (
-    <section className="featured" id="top-products">
-      <div className="section-heading">
-        <h2>Featured Computers &amp; Components</h2>
-        <p>Updated automatically whenever new units arrive.</p>
+    <section className="mx-auto w-full max-w-6xl px-5 py-10" id="top-products">
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold text-[#ecf3ff]">Featured Computers &amp; Components</h2>
+        <p className="mt-1 text-sm text-[#a8b6ca]">Updated automatically whenever new units arrive.</p>
       </div>
-      <div className="product-grid" aria-live="polite">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" aria-live="polite">
         {products.map((product) => (
-          <article className="product-card" key={product.id}>
-            <div>
-              <h3>{product.name}</h3>
-              <p className="category">{product.category}</p>
-              <p className="price">${product.price.toLocaleString()}</p>
-              <p className="specs">{product.specs.join(" • ")}</p>
-            </div>
-            <div className="cta-group">
-              <button
-                className="btn outline"
-                onClick={() => onBuy(product)}
-                type="button"
-              >
-                Buy now
-              </button>
-              <span className={product.stock < 8 ? "low-stock" : ""}>
-                {product.stock} in stock
-              </span>
-            </div>
-          </article>
+          <ProductCard key={product.id} product={product} onBuyNow={onBuy} />
         ))}
       </div>
     </section>

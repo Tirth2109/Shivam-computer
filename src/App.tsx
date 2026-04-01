@@ -1,7 +1,9 @@
+import { useLayoutEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ProductsProvider } from "./context/ProductsContext";
+import { WishlistProvider } from "./context/WishlistContext";
 import { useScrollReveal } from "./hooks/useScrollReveal";
 import HomePage from "./pages/HomePage";
 import CategoryPage from "./pages/CategoryPage";
@@ -14,14 +16,22 @@ import PlaceholderPage from "./pages/PlaceholderPage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
 import AccountPage from "./pages/AccountPage";
+import WishlistPage from "./pages/WishlistPage";
 
 function AppRoutes() {
   const location = useLocation();
   const routeKey = `${location.pathname}${location.search}`;
   useScrollReveal(routeKey);
 
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname, location.search]);
+
   return (
-    <div key={routeKey} className="route-transition">
+    <div
+      key={routeKey}
+      className="motion-safe:animate-[routeFadeSlide_0.4s_cubic-bezier(0.22,1,0.36,1)_both]"
+    >
       <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/category/:slug?" element={<CategoryPage />} />
@@ -85,15 +95,7 @@ function AppRoutes() {
             />
           }
         />
-        <Route
-          path="/wishlist"
-          element={
-            <PlaceholderPage
-              title="Wishlist"
-              message="Save your favourite products here."
-            />
-          }
-        />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route
@@ -161,9 +163,11 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ProductsProvider>
-          <CartProvider>
-            <AppRoutes />
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <AppRoutes />
+            </CartProvider>
+          </WishlistProvider>
         </ProductsProvider>
       </AuthProvider>
     </BrowserRouter>

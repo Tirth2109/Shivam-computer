@@ -4,8 +4,11 @@ import { brandsWithLogos, getBrandLogoUrl, getLocalBrandLogoPath } from "../data
 
 export default function BrandsMarquee() {
   return (
-    <div className="brands-marquee-wrap">
-      <div className="brands-marquee" aria-hidden="true">
+    <div className="overflow-hidden rounded-xl border border-[#2a3f5d] bg-[#111b2c] px-4 py-3">
+      <div
+        className="flex w-max items-center gap-6 motion-safe:animate-[brands-scroll_40s_linear_infinite] hover:[animation-play-state:paused]"
+        aria-hidden="true"
+      >
         {[...brandsWithLogos, ...brandsWithLogos].map((brand, i) => (
           <BrandLogoItem key={`${brand.slug}-${i}`} brand={brand} />
         ))}
@@ -66,12 +69,14 @@ function BrandLogoItem({
 
   const isVideo = src.endsWith(".mp4");
   const isSmallLogo = "logoSize" in brand && brand.logoSize === "small";
-  const itemClass = `brands-marquee-item${isSmallLogo ? " brands-marquee-item--small" : ""}`;
+  const itemClass = `flex h-[70px] min-w-[150px] items-center justify-center rounded-lg border border-[#2a3f5d] bg-[#0f1625] p-2 ${
+    isSmallLogo ? "min-w-[120px]" : ""
+  }`;
 
   if (useFallbackText) {
     return (
       <div className={itemClass}>
-        <span className="brands-marquee-fallback brands-marquee-fallback-visible">
+        <span className="text-sm font-semibold text-[#ecf3ff]">
           {brand.name}
         </span>
       </div>
@@ -80,7 +85,7 @@ function BrandLogoItem({
 
   if (isLottieBrand && lottieData) {
     return (
-      <div className={`brands-marquee-item brands-marquee-item--lottie${isSmallLogo ? " brands-marquee-item--small" : ""}`}>
+      <div className={itemClass}>
         <Lottie
           animationData={lottieData}
           loop
@@ -93,15 +98,15 @@ function BrandLogoItem({
 
   if (isLottieBrand && !lottieData) {
     return (
-      <div className="brands-marquee-item">
-        <span className="brands-marquee-fallback">{brand.name}</span>
+      <div className={itemClass}>
+        <span className="text-sm font-semibold text-[#a8b6ca]">{brand.name}</span>
       </div>
     );
   }
 
   if (isVideo) {
     return (
-      <div className="brands-marquee-item brands-marquee-item--video">
+      <div className={itemClass}>
         <video
           src={src}
           autoPlay
@@ -110,6 +115,7 @@ function BrandLogoItem({
           playsInline
           aria-label={brand.name}
           onError={handleError}
+          className="h-full w-full object-contain"
         />
       </div>
     );
@@ -122,8 +128,9 @@ function BrandLogoItem({
         alt={brand.name}
         loading="lazy"
         onError={handleError}
+        className="h-full w-full object-contain"
       />
-      <span className="brands-marquee-fallback">{brand.name}</span>
+      <span className="sr-only">{brand.name}</span>
     </div>
   );
 }

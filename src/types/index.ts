@@ -29,11 +29,43 @@ export interface Category {
   icon?: string;
 }
 
+export type OrderStatus = "pending" | "shipped" | "fulfilled";
+export type OrderSource = "checkout" | "simulate";
+export type PaymentMethod = "cod" | "upi" | "card" | "netbanking" | "unknown";
+
+export interface OrderCustomer {
+  name: string;
+  phone: string;
+  email: string;
+}
+
+export interface OrderShippingAddress {
+  addressLine: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+export interface OrderItem {
+  productId: string;
+  productName: string;
+  unitPrice: number;
+  quantity: number;
+  lineTotal: number;
+}
+
 export interface Order {
   id: string;
-  productName: string;
   placedAt: string;
-  status: "pending" | "shipped" | "fulfilled";
+  status: OrderStatus;
+  source: OrderSource;
+  customer: OrderCustomer;
+  shippingAddress: OrderShippingAddress;
+  paymentMethod: PaymentMethod;
+  items: OrderItem[];
+  subtotal: number;
+  shippingCharge: number;
+  grandTotal: number;
 }
 
 export interface User {

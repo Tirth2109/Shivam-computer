@@ -103,13 +103,16 @@ export default function AdminProductForm({
   };
 
   const specsText = Array.isArray(form.specs) ? form.specs.join("\n") : "";
+  const fieldClass =
+    "mt-1 w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]";
 
   return (
-    <form className="admin-product-form" onSubmit={handleSubmit}>
-      <div className="admin-form-grid">
-        <div className="admin-form-group">
-          <label>Product ID</label>
+    <form className="space-y-4" onSubmit={handleSubmit}>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label className="text-sm text-[#d5deec]">Product ID</label>
           <input
+            className={fieldClass}
             type="text"
             value={form.id ?? ""}
             onChange={(e) => update("id", e.target.value)}
@@ -117,9 +120,10 @@ export default function AdminProductForm({
             disabled={!!product}
           />
         </div>
-        <div className="admin-form-group">
-          <label>Name *</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Name *</label>
           <input
+            className={fieldClass}
             type="text"
             value={form.name ?? ""}
             onChange={(e) => update("name", e.target.value)}
@@ -127,9 +131,10 @@ export default function AdminProductForm({
             required
           />
         </div>
-        <div className="admin-form-group">
-          <label>Category</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Category</label>
           <select
+            className={fieldClass}
             value={form.categorySlug ?? ""}
             onChange={(e) => update("categorySlug", e.target.value)}
           >
@@ -141,27 +146,30 @@ export default function AdminProductForm({
             ))}
           </select>
         </div>
-        <div className="admin-form-group">
-          <label>Category (display name)</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Category (display name)</label>
           <input
+            className={fieldClass}
             type="text"
             value={form.category ?? ""}
             onChange={(e) => update("category", e.target.value)}
             placeholder="e.g. Laptops"
           />
         </div>
-        <div className="admin-form-group">
-          <label>Brand</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Brand</label>
           <input
+            className={fieldClass}
             type="text"
             value={form.brand ?? ""}
             onChange={(e) => update("brand", e.target.value)}
             placeholder="e.g. Dell"
           />
         </div>
-        <div className="admin-form-group">
-          <label>Price (₹) *</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Price (₹) *</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             value={form.price ?? ""}
@@ -169,9 +177,10 @@ export default function AdminProductForm({
             required
           />
         </div>
-        <div className="admin-form-group">
-          <label>MRP (₹)</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">MRP (₹)</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             value={form.mrp ?? ""}
@@ -179,9 +188,10 @@ export default function AdminProductForm({
             placeholder="Original price"
           />
         </div>
-        <div className="admin-form-group">
-          <label>Discount %</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Discount %</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             max={100}
@@ -190,9 +200,10 @@ export default function AdminProductForm({
             placeholder="e.g. 10"
           />
         </div>
-        <div className="admin-form-group">
-          <label>Stock *</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Stock *</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             value={form.stock ?? ""}
@@ -200,9 +211,10 @@ export default function AdminProductForm({
             required
           />
         </div>
-        <div className="admin-form-group">
-          <label>Image URL *</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Image URL *</label>
           <input
+            className={fieldClass}
             type="url"
             value={form.image ?? ""}
             onChange={(e) => update("image", e.target.value)}
@@ -210,9 +222,10 @@ export default function AdminProductForm({
             required
           />
         </div>
-        <div className="admin-form-group">
-          <label>Rating (1–5)</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Rating (1–5)</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             max={5}
@@ -221,27 +234,30 @@ export default function AdminProductForm({
             onChange={(e) => update("rating", e.target.value)}
           />
         </div>
-        <div className="admin-form-group">
-          <label>Review count</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Review count</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             value={form.reviewCount ?? ""}
             onChange={(e) => update("reviewCount", e.target.value)}
           />
         </div>
-        <div className="admin-form-group">
-          <label>Warranty</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Warranty</label>
           <input
+            className={fieldClass}
             type="text"
             value={form.warranty ?? ""}
             onChange={(e) => update("warranty", e.target.value)}
             placeholder="e.g. 1 Year"
           />
         </div>
-        <div className="admin-form-group">
-          <label>Purpose</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Purpose</label>
           <select
+            className={fieldClass}
             value={form.purpose ?? ""}
             onChange={(e) =>
               update("purpose", e.target.value as Product["purpose"] || undefined)
@@ -255,8 +271,8 @@ export default function AdminProductForm({
             ))}
           </select>
         </div>
-        <div className="admin-form-group admin-form-group--checkbox">
-          <label>
+        <div className="flex items-center pt-6">
+          <label className="inline-flex items-center gap-2 text-sm text-[#d5deec]">
             <input
               type="checkbox"
               checked={Boolean(form.isCustomBuild)}
@@ -265,9 +281,10 @@ export default function AdminProductForm({
             Custom build
           </label>
         </div>
-        <div className="admin-form-group">
-          <label>Build time (days)</label>
+        <div>
+          <label className="text-sm text-[#d5deec]">Build time (days)</label>
           <input
+            className={fieldClass}
             type="number"
             min={0}
             value={form.buildTimeDays ?? ""}
@@ -275,9 +292,10 @@ export default function AdminProductForm({
             placeholder="For custom builds"
           />
         </div>
-        <div className="admin-form-group admin-form-group--full">
-          <label>Specs (one per line)</label>
+        <div className="md:col-span-2">
+          <label className="text-sm text-[#d5deec]">Specs (one per line)</label>
           <textarea
+            className={fieldClass}
             value={specsText}
             onChange={(e) => handleSpecsChange(e.target.value)}
             placeholder="e.g.&#10;Intel i5&#10;8GB RAM&#10;512GB SSD"
@@ -285,11 +303,18 @@ export default function AdminProductForm({
           />
         </div>
       </div>
-      <div className="admin-form-actions">
-        <button type="button" className="btn outline" onClick={onCancel}>
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-4 py-2 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+          onClick={onCancel}
+        >
           Cancel
         </button>
-        <button type="submit" className="btn primary">
+        <button
+          type="submit"
+          className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-4 py-2 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+        >
           {product ? "Update product" : "Add product"}
         </button>
       </div>

@@ -22,6 +22,12 @@ export interface ProductRow {
   build_time_days: number | null;
 }
 
+interface SiteSettingRow {
+  setting_key: string;
+  value: unknown;
+  updated_at?: string;
+}
+
 function rowToProduct(row: ProductRow): Product {
   return {
     id: row.id,
@@ -116,5 +122,29 @@ export async function seedProducts(products: Product[]): Promise<void> {
   if (!supabase) throw new Error("Supabase not configured");
   const rows = products.map((p) => productToRow(p) as ProductRow);
   const { error } = await supabase.from("products").upsert(rows, { onConflict: "id" });
+  if (error) throw error;
+}
+
+export async function fetchSiteSetting(key: string): Promise<unknown | null> {
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("value")
+    .eq("setting_key", key)
+    .maybeSingle();
+  if (error) throw error;
+  return data?.value ?? null;
+}
+
+export async function upsertSiteSetting(key: string, value: unknown): Promise<void> {
+  if (!supabase) throw new Error("Supabase not configured");
+  const payload: SiteSettingRow = {
+    setting_key: key,
+    value,
+    updated_at: new Date().toISOString(),
+  };
+  const { error } = await supabase
+    .from("site_settings")
+    .upsert(payload, { onConflict: "setting_key" });
   if (error) throw error;
 }

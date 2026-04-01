@@ -42,9 +42,9 @@ export default function AccountPage() {
     return (
       <>
         <HeaderWithDeals />
-        <main className="auth-page">
-          <div className="auth-card">
-            <p>Loading your profile...</p>
+        <main className="flex min-h-[60vh] items-center justify-center px-4 py-8">
+          <div className="w-full max-w-md rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-6 text-center">
+            <p className="text-[#ecf3ff]">Loading your profile...</p>
           </div>
         </main>
         <Footer />
@@ -128,20 +128,32 @@ export default function AccountPage() {
   return (
     <>
       <HeaderWithDeals />
-      <main className="auth-page auth-page-standalone auth-page-game-bg" role="main" style={{ padding: "4rem 1.25rem", minHeight: "80vh", justifyContent: "flex-start", alignItems: "center" }}>
-        <div className="auth-bg-game" aria-hidden="true">
-          <div className="auth-bg-grid" />
+      <main className="relative min-h-[80vh] overflow-hidden px-5 py-12" role="main">
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,_#0a0e1a_0%,_#0f1629_25%,_#131c33_50%,_#0d1220_100%)]" aria-hidden="true">
+          <div
+            className="absolute inset-0 motion-safe:animate-[auth-grid-pulse_4s_ease-in-out_infinite]"
+            style={{
+              backgroundImage:
+                "linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px)",
+              backgroundSize: "40px 40px",
+            }}
+          />
         </div>
-        
-        <div className="auth-card account-card" style={{ maxWidth: "800px", width: "100%", padding: "2.5rem" }}>
-          <h1 style={{ textAlign: "left", fontSize: "1.75rem", marginBottom: "2rem" }}>My Profile Page</h1>
-          
+
+        <div className="mx-auto w-full max-w-4xl rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-8">
+          <h1 className="mb-8 text-left text-3xl font-semibold text-[#ecf3ff]">My Profile Page</h1>
+
           <form onSubmit={handleSave}>
-            <div className="account-profile-grid">
-              
-              <div className="account-field">
-                <label>Title</label>
-                <select name="title" value={formData.title} onChange={handleChange}>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Title</label>
+                <select
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                >
                   <option value="">Select Title</option>
                   <option value="Mr">Mr.</option>
                   <option value="Ms">Ms.</option>
@@ -150,67 +162,126 @@ export default function AccountPage() {
                 </select>
               </div>
 
-              <div className="account-field">
-                <label>First Name</label>
-                <input type="text" name="firstName" placeholder="Enter First Name" value={formData.firstName} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">First Name</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="text"
+                  name="firstName"
+                  placeholder="Enter First Name"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                />
               </div>
 
-              <div className="account-field">
-                <label>Middle Name</label>
-                <input type="text" name="middleName" placeholder="Enter Middle Name" value={formData.middleName} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Middle Name</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="text"
+                  name="middleName"
+                  placeholder="Enter Middle Name"
+                  value={formData.middleName}
+                  onChange={handleChange}
+                />
               </div>
 
-              <div className="account-field">
-                <label>Last Name</label>
-                <input type="text" name="lastName" placeholder="Enter Last Name" value={formData.lastName} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Last Name</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="text"
+                  name="lastName"
+                  placeholder="Enter Last Name"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                />
               </div>
 
-              <div className="account-field" style={{ gridColumn: "1 / -1" }}>
-                <div className="gender-options">
-                  <label className="gender-option">
+              <div className="md:col-span-2">
+                <div className="flex flex-wrap gap-3">
+                  <label className="inline-flex items-center gap-2 rounded-full border border-[#2a3f5d] px-3 py-1.5 text-sm text-[#d5deec]">
                     <input type="radio" name="gender" value="Female" checked={formData.gender === "Female"} onChange={handleChange} />
                     Female
                   </label>
-                  <label className="gender-option">
+                  <label className="inline-flex items-center gap-2 rounded-full border border-[#2a3f5d] px-3 py-1.5 text-sm text-[#d5deec]">
                     <input type="radio" name="gender" value="Male" checked={formData.gender === "Male"} onChange={handleChange} />
                     Male
                   </label>
-                  <label className="gender-option">
+                  <label className="inline-flex items-center gap-2 rounded-full border border-[#2a3f5d] px-3 py-1.5 text-sm text-[#d5deec]">
                     <input type="radio" name="gender" value="Transgender" checked={formData.gender === "Transgender"} onChange={handleChange} />
                     Transgender
                   </label>
-                  <label className="gender-option">
+                  <label className="inline-flex items-center gap-2 rounded-full border border-[#2a3f5d] px-3 py-1.5 text-sm text-[#d5deec]">
                     <input type="radio" name="gender" value="Other" checked={formData.gender === "Other"} onChange={handleChange} />
                     I'd rather not say
                   </label>
                 </div>
               </div>
 
-              <div className="account-field">
-                <label>Mobile Number *</label>
-                <input type="tel" name="phone" placeholder="Enter Mobile Number" value={formData.phone || ""} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Mobile Number *</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="tel"
+                  name="phone"
+                  placeholder="Enter Mobile Number"
+                  value={formData.phone || ""}
+                  onChange={handleChange}
+                />
               </div>
 
-              <div className="account-field">
-                <label>Email Id *</label>
-                <input type="email" name="email" placeholder="Enter Email ID" value={formData.email || ""} onChange={handleChange} required />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Email Id *</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="email"
+                  name="email"
+                  placeholder="Enter Email ID"
+                  value={formData.email || ""}
+                  onChange={handleChange}
+                  required
+                />
               </div>
 
-              <div className="account-field">
-                <label>Date of Birth</label>
-                <input type="date" name="dob" value={formData.dob} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Date of Birth</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="date"
+                  name="dob"
+                  value={formData.dob}
+                  onChange={handleChange}
+                />
               </div>
 
-              <div className="account-field">
-                <label>Date of Anniversary</label>
-                <input type="date" name="anniversary" value={formData.anniversary} onChange={handleChange} />
+              <div>
+                <label className="mb-1 block text-sm text-[#d5deec]">Date of Anniversary</label>
+                <input
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  type="date"
+                  name="anniversary"
+                  value={formData.anniversary}
+                  onChange={handleChange}
+                />
               </div>
 
             </div>
 
-            <div className="account-actions">
-              <button type="button" className="btn outline" style={{ color: "var(--text)", borderColor: "var(--border)" }} onClick={handleDiscard}>DISCARD CHANGES</button>
-              <button type="submit" className="btn btn-teal">SAVE CHANGES</button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="rounded-full border border-[#2a3f5d] px-5 py-2.5 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff]"
+                onClick={handleDiscard}
+              >
+                DISCARD CHANGES
+              </button>
+              <button
+                type="submit"
+                className="rounded-full border border-[#14b8a6] bg-[#14b8a6] px-5 py-2.5 text-sm font-semibold text-[#06211e] transition hover:bg-[#2dd4bf]"
+              >
+                SAVE CHANGES
+              </button>
             </div>
           </form>
 

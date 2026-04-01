@@ -42,6 +42,25 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const LOCAL_ADMIN_USERNAME = "admin";
+
+function getStoredLocalAdmin(): UserState | null {
+  try {
+    const raw = localStorage.getItem("summitCurrentUser");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as UserState;
+    if (
+      parsed &&
+      parsed.role === "admin" &&
+      (parsed.username ?? "").toLowerCase() === LOCAL_ADMIN_USERNAME
+    ) {
+      return parsed;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
 
 function splitFullName(fullName: string) {
   const parts = fullName.trim().split(/\s+/).filter(Boolean);
@@ -107,18 +126,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ?.auth.getSession()
       .then(({ data }) => {
         setSession(data.session ?? null);
-        setUser(data.session?.user ? supabaseUserToState(data.session.user) : null);
+        if (data.session?.user) {
+          setUser(supabaseUserToState(data.session.user));
+        } else {
+          setUser(getStoredLocalAdmin());
+        }
         if (data.session?.user) {
           const nextUser = supabaseUserToState(data.session.user);
           localStorage.setItem("summitCurrentUser", JSON.stringify(nextUser));
-        } else {
+        } else if (!getStoredLocalAdmin()) {
           localStorage.removeItem("summitCurrentUser");
         }
       })
       .catch(() => {
         setSession(null);
-        setUser(null);
-        localStorage.removeItem("summitCurrentUser");
+        const localAdmin = getStoredLocalAdmin();
+        if (localAdmin) {
+          setUser(localAdmin);
+        } else {
+          setUser(null);
+          localStorage.removeItem("summitCurrentUser");
+        }
       })
       .finally(() => setLoading(false));
 
@@ -130,8 +158,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(nextUser);
           localStorage.setItem("summitCurrentUser", JSON.stringify(nextUser));
         } else {
-          setUser(null);
-          localStorage.removeItem("summitCurrentUser");
+          const localAdmin = getStoredLocalAdmin();
+          if (localAdmin) {
+            setUser(localAdmin);
+          } else {
+            setUser(null);
+            localStorage.removeItem("summitCurrentUser");
+          }
         }
       }
     );

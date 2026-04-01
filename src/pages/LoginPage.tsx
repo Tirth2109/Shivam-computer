@@ -7,6 +7,8 @@ import { isSupabaseConfigured } from "../lib/supabase";
 
 const REGISTERED_USERS_KEY = "shivam_registered_users";
 const OTP_RESEND_COOLDOWN_MS = 60_000;
+const LOCAL_ADMIN_USERNAME = "admin";
+const LOCAL_ADMIN_PASSWORD = "shivam2026";
 
 type OtpVerificationState = {
   email: string;
@@ -41,6 +43,7 @@ export default function LoginPage() {
   const {
     user,
     loading: authLoading,
+    setUser,
     signInWithPassword,
     signInWithOtp,
     verifyEmailOtp,
@@ -113,7 +116,22 @@ export default function LoginPage() {
     const email = formData.get("email")?.toString().trim() ?? "";
     const password = formData.get("password")?.toString() ?? "";
 
+    const isLocalAdminLogin =
+      email.toLowerCase() === LOCAL_ADMIN_USERNAME &&
+      password === LOCAL_ADMIN_PASSWORD;
+
     if (supabaseEnabled) {
+      if (loginMethod === "password" && isLocalAdminLogin) {
+        setUser({
+          username: LOCAL_ADMIN_USERNAME,
+          role: "admin",
+          email: "admin@local",
+        });
+        setSuccessStatus("Admin login successful. Redirecting to dashboard.");
+        setTimeout(() => navigate("/admin"), 300);
+        return;
+      }
+
       if (!email) {
         setErrorStatus("Please enter your email.");
         return;
@@ -328,35 +346,73 @@ export default function LoginPage() {
     ? Math.max(0, Math.ceil((verification.cooldownUntil - nowMs) / 1000))
     : 0;
 
+  const labelClass = "flex flex-col gap-1.5 text-sm font-medium text-[#ecf3ff]";
+  const inputClass =
+    "w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3.5 py-2.5 text-base text-[#ecf3ff] placeholder:text-[#a8b6ca] outline-none transition focus:border-[#5ec7ff] focus:ring-2 focus:ring-[#5ec7ff4d]";
+  const primaryButtonClass =
+    "w-full rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-4 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff] disabled:cursor-not-allowed disabled:opacity-60";
+  const outlineButtonClass =
+    "rounded-full border border-[#2a3f5d] bg-transparent px-4 py-2.5 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff] disabled:cursor-not-allowed disabled:opacity-60";
+  const authTabClass = (active: boolean) =>
+    `w-full rounded-full border px-4 py-2.5 text-[0.95rem] font-semibold transition ${
+      active
+        ? "border-[#5ec7ff] bg-[#5ec7ff] text-[#050812] shadow-[0_0_0_1px_rgba(94,199,255,0.2)]"
+        : "border-[#2a3f5d] bg-[#0f1625] text-[#d5deec] hover:border-[#5ec7ff] hover:text-[#5ec7ff]"
+    }`;
+
+  const orbStyles = [
+    "left-[10%] top-[20%] h-[200px] w-[200px] bg-[rgba(94,199,255,0.5)] [animation-delay:0s]",
+    "right-[15%] top-[60%] h-[150px] w-[150px] bg-[rgba(63,185,80,0.4)] [animation-delay:-2s]",
+    "left-1/2 bottom-[10%] h-[180px] w-[180px] bg-[rgba(255,140,0,0.35)] [animation-delay:-4s]",
+    "right-[40%] top-[15%] h-[120px] w-[120px] bg-[rgba(168,85,247,0.4)] [animation-delay:-6s]",
+    "left-[30%] bottom-[40%] h-[100px] w-[100px] bg-[rgba(236,72,153,0.3)] [animation-delay:-1s]",
+  ];
+
   return (
-    <main className="auth-page auth-page-standalone auth-page-game-bg" role="main">
-      <div className="auth-bg-game" aria-hidden="true">
-        <div className="auth-bg-grid" />
-        <div className="auth-bg-orb auth-bg-orb-1" />
-        <div className="auth-bg-orb auth-bg-orb-2" />
-        <div className="auth-bg-orb auth-bg-orb-3" />
-        <div className="auth-bg-orb auth-bg-orb-4" />
-        <div className="auth-bg-orb auth-bg-orb-5" />
-        <div className="auth-bg-pixels">
-          {[...Array(20)].map((_, i) => (
-            <span
-              key={i}
-              className="auth-bg-pixel"
-              style={{
-                animationDelay: `${i * 0.3}s`,
-                left: `${(i * 5) % 100}%`,
-                top: `${(i * 7) % 100}%`,
-              }}
-            />
-          ))}
+    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden px-4 py-8" role="main">
+      <div
+        className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,_#0a0e1a_0%,_#0f1629_25%,_#131c33_50%,_#0d1220_100%)]"
+        aria-hidden="true"
+      >
+        <div
+          className="absolute inset-0 motion-safe:animate-[auth-grid-pulse_4s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-50"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+        {orbStyles.map((orbClass, index) => (
+          <div
+            key={index}
+            className={`absolute rounded-full opacity-40 blur-[60px] motion-safe:animate-[auth-orb-float_8s_ease-in-out_infinite] motion-reduce:animate-none ${orbClass}`}
+          />
+        ))}
+        <div className="pointer-events-none absolute inset-0">
+          {[...Array(20)].map((_, i) => {
+            const palette = ["rgba(88, 166, 255, 0.5)", "rgba(63, 185, 80, 0.5)", "rgba(255, 140, 0, 0.5)"];
+            return (
+              <span
+                key={i}
+                className="absolute h-2 w-2 rounded-[2px] motion-safe:animate-[auth-pixel-float_6s_ease-in-out_infinite] motion-reduce:animate-none motion-reduce:opacity-30"
+                style={{
+                  animationDelay: `${i * 0.3}s`,
+                  animationDuration: `${5 + (i % 3)}s`,
+                  background: palette[i % palette.length],
+                  left: `${(i * 5) % 100}%`,
+                  top: `${(i * 7) % 100}%`,
+                }}
+              />
+            );
+          })}
         </div>
       </div>
 
-      <div className="auth-card">
-        <div className="auth-tabs">
+      <div className="relative z-10 w-full max-w-[400px] rounded-[12px] border border-[#2a3f5d] bg-[#111b2c] p-8 text-left shadow-[0_2px_16px_rgba(0,0,0,0.35)] motion-safe:animate-[fadeInUp_0.5s_cubic-bezier(0.22,1,0.36,1)_both]">
+        <div className="mb-5 grid grid-cols-2 gap-2">
           <button
             type="button"
-            className={`auth-tab ${mode === "login" ? "active" : ""}`}
+            className={authTabClass(mode === "login")}
             onClick={() => {
               setMode("login");
               setStatus("");
@@ -367,7 +423,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
-            className={`auth-tab ${mode === "signup" ? "active" : ""}`}
+            className={authTabClass(mode === "signup")}
             onClick={() => {
               setMode("signup");
               setStatus("");
@@ -380,14 +436,14 @@ export default function LoginPage() {
 
         {supabaseEnabled && verification ? (
           <>
-            <h1>Verify email</h1>
-            <p>
+            <h1 className="mb-2 text-center text-2xl font-semibold text-[#ecf3ff]">Verify email</h1>
+            <p className="mb-5 text-center text-[0.95rem] text-[#a8b6ca]">
               {verification.source === "signup"
                 ? `Enter the code sent to ${verification.email} to complete signup.`
                 : `Enter the code sent to ${verification.email} to login.`}
             </p>
-            <form id="otp-form" onSubmit={handleVerifyOtp} noValidate>
-              <label htmlFor="otp-code">
+            <form id="otp-form" onSubmit={handleVerifyOtp} noValidate className="mb-4 flex flex-col gap-4">
+              <label htmlFor="otp-code" className={labelClass}>
                 OTP code
                 <input
                   id="otp-code"
@@ -399,27 +455,27 @@ export default function LoginPage() {
                   required
                   placeholder="Enter 6 to 8 digit OTP"
                   value={otpToken}
+                  className={inputClass}
                   onChange={(event) => setOtpToken(event.target.value.replace(/\D/g, "").slice(0, 8))}
                 />
               </label>
-              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+              <button type="submit" className={primaryButtonClass} disabled={isBusy}>
                 {isBusy ? "Verifying..." : "Verify code"}
               </button>
               <button
                 type="button"
-                className="btn outline"
-                style={{ width: "100%", marginTop: "0.75rem" }}
+                className={`${outlineButtonClass} mt-3 w-full`}
                 onClick={handleResendOtp}
                 disabled={isBusy || secondsUntilResend > 0}
               >
                 {secondsUntilResend > 0 ? `Resend in ${secondsUntilResend}s` : "Resend OTP"}
               </button>
             </form>
-            <p className="microcopy">
+            <p className="m-0 text-center text-xs text-[#a8b6ca]">
               Wrong email?{" "}
               <button
                 type="button"
-                className="link-btn"
+                className="cursor-pointer bg-transparent p-0 text-inherit text-[#5ec7ff] transition hover:text-[#81d7ff]"
                 onClick={() => {
                   clearVerification();
                   setStatus("");
@@ -431,45 +487,44 @@ export default function LoginPage() {
           </>
         ) : mode === "login" ? (
           <>
-            <h1>Login</h1>
-            <p>Sign in to continue to the Shivam Computer home page.</p>
+            <h1 className="mb-2 text-center text-2xl font-semibold text-[#ecf3ff]">Login</h1>
+            <p className="mb-5 text-center text-[0.95rem] text-[#a8b6ca]">Sign in to continue to the Shivam Computer home page.</p>
 
             {supabaseEnabled && (
-              <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+              <div className="mb-4 flex gap-2">
                 <button
                   type="button"
-                  className="btn outline"
+                  className={`${outlineButtonClass} flex-1 py-2 ${loginMethod === "password" ? "border-[#5ec7ff] text-[#5ec7ff] opacity-100" : "opacity-70"}`}
                   onClick={() => setLoginMethod("password")}
-                  style={{ opacity: loginMethod === "password" ? 1 : 0.7 }}
                 >
                   Password
                 </button>
                 <button
                   type="button"
-                  className="btn outline"
+                  className={`${outlineButtonClass} flex-1 py-2 ${loginMethod === "otp" ? "border-[#5ec7ff] text-[#5ec7ff] opacity-100" : "opacity-70"}`}
                   onClick={() => setLoginMethod("otp")}
-                  style={{ opacity: loginMethod === "otp" ? 1 : 0.7 }}
                 >
                   Email OTP
                 </button>
               </div>
             )}
 
-            <form id="login-form" onSubmit={handleLogin}>
-              <label htmlFor="login-email-or-username">
-                Email
+            <form id="login-form" onSubmit={handleLogin} className="mb-4 flex flex-col gap-4">
+              <label htmlFor="login-email-or-username" className={labelClass}>
+                Email / Username
                 <input
                   id="login-email-or-username"
-                  type="email"
+                  type="text"
                   name="email"
-                  autoComplete="email"
+                  autoComplete="username"
                   required
-                  placeholder="Enter your email"
+                  placeholder="Enter email or 'admin'"
+                  className={inputClass}
                 />
               </label>
 
               {(!supabaseEnabled || loginMethod === "password") && (
-                <label htmlFor="login-password">
+                <label htmlFor="login-password" className={labelClass}>
                   Password
                   <input
                     id="login-password"
@@ -478,11 +533,12 @@ export default function LoginPage() {
                     autoComplete="current-password"
                     required
                     placeholder="Enter password"
+                    className={inputClass}
                   />
                 </label>
               )}
 
-              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+              <button type="submit" className={primaryButtonClass} disabled={isBusy}>
                 {supabaseEnabled && loginMethod === "otp"
                   ? isBusy
                     ? "Sending OTP..."
@@ -495,10 +551,12 @@ export default function LoginPage() {
           </>
         ) : (
           <>
-            <h1>Sign up</h1>
-            <p>Create an account and continue to the Shivam Computer home page.</p>
-            <form id="signup-form" onSubmit={handleSignUp}>
-              <label htmlFor="signup-fullName">
+            <h1 className="mb-2 text-center text-2xl font-semibold text-[#ecf3ff]">Sign up</h1>
+            <p className="mb-5 text-center text-[0.95rem] text-[#a8b6ca]">
+              Create an account and continue to the Shivam Computer home page.
+            </p>
+            <form id="signup-form" onSubmit={handleSignUp} className="mb-4 flex flex-col gap-4">
+              <label htmlFor="signup-fullName" className={labelClass}>
                 Full name
                 <input
                   id="signup-fullName"
@@ -507,10 +565,11 @@ export default function LoginPage() {
                   autoComplete="name"
                   required
                   placeholder="Enter your full name"
+                  className={inputClass}
                 />
               </label>
 
-              <label htmlFor="signup-email">
+              <label htmlFor="signup-email" className={labelClass}>
                 Email
                 <input
                   id="signup-email"
@@ -519,10 +578,11 @@ export default function LoginPage() {
                   autoComplete="email"
                   required
                   placeholder="Enter your email"
+                  className={inputClass}
                 />
               </label>
 
-              <label htmlFor="signup-password">
+              <label htmlFor="signup-password" className={labelClass}>
                 Password
                 <input
                   id="signup-password"
@@ -531,27 +591,28 @@ export default function LoginPage() {
                   autoComplete="new-password"
                   required
                   placeholder="Choose a password (min 6 characters)"
+                  className={inputClass}
                 />
               </label>
 
-              <button type="submit" className="btn primary" style={{ width: "100%" }} disabled={isBusy}>
+              <button type="submit" className={primaryButtonClass} disabled={isBusy}>
                 {isBusy ? "Creating account..." : "Create account"}
               </button>
             </form>
           </>
         )}
 
-        <p id="login-status" className="status-message" style={{ color: statusColor }}>
+        <p id="login-status" className="mb-4 min-h-6 text-center text-sm" style={{ color: statusColor }}>
           {status}
         </p>
 
-        <p className="microcopy">
+        <p className="m-0 text-center text-xs text-[#a8b6ca]">
           {mode === "login" ? (
             <>
               Don&apos;t have an account?{" "}
               <button
                 type="button"
-                className="link-btn"
+                className="cursor-pointer bg-transparent p-0 text-inherit text-[#5ec7ff] transition hover:text-[#81d7ff]"
                 onClick={() => {
                   setMode("signup");
                   clearVerification();
@@ -565,7 +626,7 @@ export default function LoginPage() {
               Already have an account?{" "}
               <button
                 type="button"
-                className="link-btn"
+                className="cursor-pointer bg-transparent p-0 text-inherit text-[#5ec7ff] transition hover:text-[#81d7ff]"
                 onClick={() => {
                   setMode("login");
                   clearVerification();
@@ -577,8 +638,10 @@ export default function LoginPage() {
           )}
         </p>
 
-        <p className="microcopy">
-          <Link to="/">← Back to home</Link>
+        <p className="mt-3 text-center text-xs text-[#a8b6ca]">
+          <Link to="/" className="text-[#5ec7ff] transition hover:text-[#81d7ff]">
+            ← Back to home
+          </Link>
         </p>
       </div>
     </main>

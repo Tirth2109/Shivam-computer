@@ -19,11 +19,14 @@ const categories = [
 
 export default function Categories() {
   return (
-    <section className="categories">
+    <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-4 px-5 py-10 sm:grid-cols-2 lg:grid-cols-4">
       {categories.map((category) => (
-        <article key={category.title}>
-          <h3>{category.title}</h3>
-          <p>{category.copy}</p>
+        <article
+          key={category.title}
+          className="rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-5 shadow-[0_2px_16px_rgba(0,0,0,0.35)]"
+        >
+          <h3 className="mb-2 text-lg font-semibold text-[#ecf3ff]">{category.title}</h3>
+          <p className="text-sm text-[#a8b6ca]">{category.copy}</p>
         </article>
       ))}
     </section>

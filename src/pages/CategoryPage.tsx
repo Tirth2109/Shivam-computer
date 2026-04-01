@@ -113,14 +113,18 @@ export default function CategoryPage() {
     navigate("/cart");
   };
 
+  const panelClass = "rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-4";
+  const fieldClass =
+    "mt-1 w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]";
+
   return (
     <>
       <HeaderWithDeals />
       <main>
-        <div className="section" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
-              <h2>
+        <div className="py-10" data-reveal>
+          <div className="mx-auto w-full max-w-6xl px-5">
+            <div className="mb-6" data-reveal style={{ transitionDelay: "50ms" }}>
+              <h2 className="text-2xl font-semibold text-[#ecf3ff]">
                 {slug === "components"
                   ? "Computer Components"
                   : category
@@ -129,15 +133,16 @@ export default function CategoryPage() {
                       ? `Search: "${q}"`
                       : "All Products"}
               </h2>
-              <p>{filteredAndSorted.length} products</p>
+              <p className="mt-1 text-sm text-[#a8b6ca]">{filteredAndSorted.length} products</p>
             </div>
 
-            <div className="category-layout">
-              <aside className="filters-panel">
-                <h3>Filters</h3>
-                <div className="filter-group">
-                  <label>Brand</label>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_1fr]">
+              <aside className={panelClass}>
+                <h3 className="mb-3 text-lg font-semibold text-[#ecf3ff]">Filters</h3>
+                <div className="mb-3">
+                  <label className="text-sm font-medium text-[#d5deec]">Brand</label>
                   <select
+                    className={fieldClass}
                     value={brandFilter}
                     onChange={(e) => setBrandFilter(e.target.value)}
                   >
@@ -147,47 +152,50 @@ export default function CategoryPage() {
                     ))}
                   </select>
                 </div>
-                <div className="filter-group">
-                  <label>Min price (₹)</label>
+                <div className="mb-3">
+                  <label className="text-sm font-medium text-[#d5deec]">Min price (₹)</label>
                   <input
+                    className={fieldClass}
                     type="number"
                     placeholder="Min"
                     value={priceMin}
                     onChange={(e) => setPriceMin(e.target.value)}
                   />
                 </div>
-                <div className="filter-group">
-                  <label>Max price (₹)</label>
+                <div className="mb-3">
+                  <label className="text-sm font-medium text-[#d5deec]">Max price (₹)</label>
                   <input
+                    className={fieldClass}
                     type="number"
                     placeholder="Max"
                     value={priceMax}
                     onChange={(e) => setPriceMax(e.target.value)}
                   />
                 </div>
-                <div className="filter-group">
-                  <label>
+                <div>
+                  <label className="inline-flex items-center gap-2 text-sm text-[#d5deec]">
                     <input
                       type="checkbox"
                       checked={inStockOnly}
                       onChange={(e) => setInStockOnly(e.target.checked)}
-                    />{" "}
+                      className="h-4 w-4 rounded border-[#2a3f5d] bg-transparent"
+                    />
                     In stock only
                   </label>
                 </div>
               </aside>
 
               <div>
-                <div className="toolbar">
+                <div className="mb-4 flex items-center justify-between gap-3">
                   <button
                     type="button"
-                    className="btn secondary btn-sm"
+                    className="hidden rounded-full border border-[#2a3f5d] px-3 py-1.5 text-xs font-semibold text-[#ecf3ff]"
                     onClick={() => setShowFilters(!showFilters)}
-                    style={{ display: "none" }}
                   >
                     {showFilters ? "Hide" : "Filter"}
                   </button>
                   <select
+                    className="ml-auto rounded-lg border border-[#2a3f5d] bg-[#111b2c] px-3 py-2 text-sm text-[#ecf3ff] outline-none focus:border-[#5ec7ff]"
                     value={sort}
                     onChange={(e) => setSort(e.target.value as SortOption)}
                     aria-label="Sort by"
@@ -199,7 +207,7 @@ export default function CategoryPage() {
                     ))}
                   </select>
                 </div>
-                <div className="product-grid">
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
                   {filteredAndSorted.map((product) => (
                     <ProductCard
                       key={product.id}
@@ -210,7 +218,7 @@ export default function CategoryPage() {
                   ))}
                 </div>
                 {filteredAndSorted.length === 0 && (
-                  <p className="text-muted">No products match your filters.</p>
+                  <p className="mt-4 text-sm text-[#a8b6ca]">No products match your filters.</p>
                 )}
               </div>
             </div>

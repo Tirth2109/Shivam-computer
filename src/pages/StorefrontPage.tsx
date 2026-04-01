@@ -21,7 +21,7 @@ export default function StorefrontPage() {
 
   const handleBuy = (product: Product) => {
     const order = simulateOrder(product);
-    setToastMessage(`${order.productName} added to mock orders`);
+    setToastMessage(`${order.items[0]?.productName ?? product.name} added to mock orders`);
     setTimeout(() => setToastMessage(null), 2200);
   };
 
@@ -37,25 +37,33 @@ export default function StorefrontPage() {
     <>
       <HeaderWithDeals />
       <main>
-        <section className="hero">
+        <section className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-5 py-10 lg:grid-cols-[1fr_320px]">
           <div>
-            <p className="eyebrow">Built for pros, students, and creators</p>
-            <h1>All the computer gear you need under one roof</h1>
-            <p className="lead">
+            <p className="text-xs uppercase tracking-[0.2em] text-[#a8b6ca]">Built for pros, students, and creators</p>
+            <h1 className="mt-3 text-4xl font-semibold leading-tight text-[#ecf3ff]">All the computer gear you need under one roof</h1>
+            <p className="mt-4 max-w-2xl text-base text-[#a7b0bd]">
               Laptops, keyboards, accessories, and electronics that ship
               instantly with automated restock alerts and friendly support.
             </p>
-            <div className="cta-group">
-              <button className="btn primary" type="button" onClick={scrollToProducts}>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                className="inline-flex items-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-5 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+                type="button"
+                onClick={scrollToProducts}
+              >
                 Shop laptops
               </button>
-              <button className="btn outline" type="button" onClick={scrollToContact}>
+              <button
+                className="inline-flex items-center rounded-full border border-[#2a3f5d] px-5 py-2.5 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff]"
+                type="button"
+                onClick={scrollToContact}
+              >
                 Talk to us
               </button>
             </div>
           </div>
-          <div className="hero-panel">
-            <p>Automated availability</p>
+          <div className="rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-4">
+            <p className="text-sm font-semibold text-[#ecf3ff]">Automated availability</p>
             <StockMeters products={products} />
           </div>
         </section>

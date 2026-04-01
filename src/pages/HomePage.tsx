@@ -1,13 +1,12 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
-import ProductCard from "../components/ProductCard";
 import BrandsMarquee from "../components/BrandsMarquee";
 import WhatsAppFloat from "../components/WhatsAppFloat";
+import ProductCard from "../components/ProductCard";
 import { categories } from "../data/categories";
-import { useCart } from "../context/CartContext";
 import { useProducts } from "../context/ProductsContext";
+import type { Product } from "../types";
 
 const TRUST_ITEMS = [
   { icon: "✅", title: "Genuine & Sealed Products", text: "100% authentic with manufacturer warranty" },
@@ -24,86 +23,97 @@ const REVIEWS = [
   { stars: 5, text: "Custom build support team helped me choose the right parts for my budget. Very satisfied.", author: "Vikram K.", verified: true },
 ];
 
+function pickUniqueProducts(list: Product[], count: number) {
+  const seen = new Set<string>();
+  const result: Product[] = [];
+
+  for (const product of list) {
+    if (seen.has(product.id)) continue;
+    seen.add(product.id);
+    result.push(product);
+    if (result.length >= count) break;
+  }
+
+  return result;
+}
+
 export default function HomePage() {
-  const [featuredTab, setFeaturedTab] = useState<"bestsellers" | "new" | "deals">("bestsellers");
-  const { addToCart } = useCart();
   const { bestSellers, newArrivals, topDeals } = useProducts();
-  const navigate = useNavigate();
 
-  const handleBuyNow = (product: { id: string }) => {
-    addToCart(product as any, 1);
-    navigate("/cart");
-  };
+  const featuredPool = [...topDeals, ...bestSellers, ...newArrivals];
+  const whatsHot = pickUniqueProducts(featuredPool, 4);
+  const dealsOfDay = pickUniqueProducts([...newArrivals, ...topDeals, ...bestSellers], 4);
 
-  const featuredProducts =
-    featuredTab === "bestsellers" ? bestSellers :
-    featuredTab === "new" ? newArrivals : topDeals;
+  const sectionClass = "py-10";
+  const sectionAltClass = "bg-[#0f1726]/50 py-10";
+  const containerClass = "mx-auto w-full max-w-6xl px-5";
+  const headingTitleClass = "text-2xl font-semibold text-[#ecf3ff]";
+  const headingTextClass = "mt-1 text-sm text-[#a8b6ca]";
 
   return (
     <>
       <HeaderWithDeals />
       <main>
         {/* Shop by Category */}
-        <section className="section section-alt" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "60ms" }}>
-              <h2>Shop by Category</h2>
-              <p>Find desktops, components, laptops, and more</p>
+        <section className={sectionAltClass} data-reveal>
+          <div className={containerClass}>
+            <div className="mb-6" data-reveal style={{ transitionDelay: "60ms" }}>
+              <h2 className={headingTitleClass}>Shop by Category</h2>
+              <p className={headingTextClass}>Find desktops, components, laptops, and more</p>
             </div>
-            <div className="category-grid">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
               {categories.map((cat, i) => (
                 <Link
                   key={cat.id}
                   to={`/category/${cat.slug}`}
-                  className="category-card"
+                  className="group flex flex-col items-center rounded-xl border border-[#2a3f5d] bg-[#111b2c] px-3 py-5 text-center transition hover:-translate-y-1 hover:border-[#5ec7ff66]"
                   data-reveal
                   style={{ transitionDelay: `${100 + i * 45}ms` }}
                 >
-                  <span className="cat-icon" aria-hidden>{cat.icon ?? "◆"}</span>
-                  <span className="cat-name">{cat.name}</span>
+                  <span
+                    className="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-full border border-[#5ec7ff40] bg-[#5ec7ff1f] text-2xl transition group-hover:scale-110"
+                    aria-hidden
+                  >
+                    {cat.icon ?? "◆"}
+                  </span>
+                  <span className="text-xs font-semibold text-[#ecf3ff]">{cat.name}</span>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Featured: Best Sellers / New Arrivals / Top Deals */}
-        <section className="section" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
-              <h2>Featured Products</h2>
-              <p>Best sellers, new arrivals, and top deals</p>
+        {/* Featured product blocks (screenshot style) */}
+        <section className={sectionClass} data-reveal>
+          <div className={containerClass}>
+            <div data-reveal style={{ transitionDelay: "40ms" }}>
+              <h2 className={headingTitleClass}>What&apos;s Hot</h2>
+              <p className={headingTextClass}>Trending picks with best running offers</p>
             </div>
-            <div className="tabs-header" data-reveal style={{ transitionDelay: "90ms" }}>
-              <button
-                type="button"
-                className={`tab-btn ${featuredTab === "bestsellers" ? "active" : ""}`}
-                onClick={() => setFeaturedTab("bestsellers")}
-              >
-                Best Sellers
-              </button>
-              <button
-                type="button"
-                className={`tab-btn ${featuredTab === "new" ? "active" : ""}`}
-                onClick={() => setFeaturedTab("new")}
-              >
-                New Arrivals
-              </button>
-              <button
-                type="button"
-                className={`tab-btn ${featuredTab === "deals" ? "active" : ""}`}
-                onClick={() => setFeaturedTab("deals")}
-              >
-                Top Deals
-              </button>
-            </div>
-            <div className="product-grid">
-              {featuredProducts.map((product) => (
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {whatsHot.map((product) => (
                 <ProductCard
-                  key={product.id}
+                  key={`hot-${product.id}`}
                   product={product}
-                  onAddToCart={addToCart}
-                  onBuyNow={handleBuyNow}
+                  badgeLabel="What's Hot"
+                  showActions={false}
+                  showRating={false}
+                />
+              ))}
+            </div>
+
+            <div className="mt-10" data-reveal style={{ transitionDelay: "70ms" }}>
+              <h2 className={headingTitleClass}>Deals Of The Day</h2>
+              <p className={headingTextClass}>Best prices right now across top categories</p>
+            </div>
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {dealsOfDay.map((product) => (
+                <ProductCard
+                  key={`deal-${product.id}`}
+                  product={product}
+                  badgeLabel="Deal Of Day"
+                  showActions={false}
+                  showRating={false}
                 />
               ))}
             </div>
@@ -111,34 +121,37 @@ export default function HomePage() {
         </section>
 
         {/* Custom Build PC */}
-        <section className="section" data-reveal>
-          <div className="container">
-            <div className="custom-build-section">
-              <h2 data-reveal style={{ transitionDelay: "30ms" }}>Build Your Custom PC</h2>
-              <div className="custom-build-steps">
-                <div className="custom-build-step" data-reveal style={{ transitionDelay: "90ms" }}>
-                  <div className="step-num">1</div>
-                  <p className="step-title">Choose your budget</p>
+        <section className={sectionClass} data-reveal>
+          <div className={containerClass}>
+            <div className="rounded-2xl border border-[#2a3f5d] bg-[#111b2c] px-5 py-7">
+              <h2 className={headingTitleClass} data-reveal style={{ transitionDelay: "30ms" }}>Build Your Custom PC</h2>
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "90ms" }}>
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">1</div>
+                  <p className="text-xs text-[#d5deec]">Choose your budget</p>
                 </div>
-                <div className="custom-build-step" data-reveal style={{ transitionDelay: "130ms" }}>
-                  <div className="step-num">2</div>
-                  <p className="step-title">Select purpose (Gaming / Office / Editing)</p>
+                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "130ms" }}>
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">2</div>
+                  <p className="text-xs text-[#d5deec]">Select purpose (Gaming / Office / Editing)</p>
                 </div>
-                <div className="custom-build-step" data-reveal style={{ transitionDelay: "170ms" }}>
-                  <div className="step-num">3</div>
-                  <p className="step-title">Pick parts (guided compatibility)</p>
+                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "170ms" }}>
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">3</div>
+                  <p className="text-xs text-[#d5deec]">Pick parts (guided compatibility)</p>
                 </div>
-                <div className="custom-build-step" data-reveal style={{ transitionDelay: "210ms" }}>
-                  <div className="step-num">4</div>
-                  <p className="step-title">Get assembled & tested</p>
+                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "210ms" }}>
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">4</div>
+                  <p className="text-xs text-[#d5deec]">Get assembled & tested</p>
                 </div>
-                <div className="custom-build-step" data-reveal style={{ transitionDelay: "250ms" }}>
-                  <div className="step-num">5</div>
-                  <p className="step-title">Delivered to your doorstep</p>
+                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "250ms" }}>
+                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">5</div>
+                  <p className="text-xs text-[#d5deec]">Delivered to your doorstep</p>
                 </div>
               </div>
-              <div className="custom-build-cta" data-reveal style={{ transitionDelay: "300ms" }}>
-                <Link to="/custom-build" className="btn">
+              <div className="mt-5" data-reveal style={{ transitionDelay: "300ms" }}>
+                <Link
+                  to="/custom-build"
+                  className="inline-flex items-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-5 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+                >
                   Start Custom Build
                 </Link>
               </div>
@@ -147,33 +160,33 @@ export default function HomePage() {
         </section>
 
         {/* Popular Brands - logos scrolling right to left */}
-        <section className="section section-alt" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "50ms" }}>
-              <h2>Popular Brands</h2>
+        <section className={sectionAltClass} data-reveal>
+          <div className={containerClass}>
+            <div className="mb-6" data-reveal style={{ transitionDelay: "50ms" }}>
+              <h2 className={headingTitleClass}>Popular Brands</h2>
             </div>
             <BrandsMarquee />
           </div>
         </section>
 
         {/* Why Shivam Computer */}
-        <section className="section" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
-              <h2>Why Shivam Computer</h2>
-              <p>Your trusted partner for PCs and components</p>
+        <section className={sectionClass} data-reveal>
+          <div className={containerClass}>
+            <div className="mb-6" data-reveal style={{ transitionDelay: "40ms" }}>
+              <h2 className={headingTitleClass}>Why Shivam Computer</h2>
+              <p className={headingTextClass}>Your trusted partner for PCs and components</p>
             </div>
-            <div className="trust-grid">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TRUST_ITEMS.map((item, i) => (
                 <div
                   key={item.title}
-                  className="trust-card"
+                  className="rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-5"
                   data-reveal
                   style={{ transitionDelay: `${80 + i * 35}ms` }}
                 >
-                  <div className="icon">{item.icon}</div>
-                  <h4>{item.title}</h4>
-                  <p>{item.text}</p>
+                  <div className="mb-2 text-2xl">{item.icon}</div>
+                  <h4 className="text-base font-semibold text-[#ecf3ff]">{item.title}</h4>
+                  <p className="mt-2 text-sm text-[#a8b6ca]">{item.text}</p>
                 </div>
               ))}
             </div>
@@ -181,24 +194,24 @@ export default function HomePage() {
         </section>
 
         {/* Reviews */}
-        <section className="section section-alt" data-reveal>
-          <div className="container">
-            <div className="section-heading" data-reveal style={{ transitionDelay: "40ms" }}>
-              <h2>Customer Reviews</h2>
-              <p>What our customers say</p>
+        <section className={sectionAltClass} data-reveal>
+          <div className={containerClass}>
+            <div className="mb-6" data-reveal style={{ transitionDelay: "40ms" }}>
+              <h2 className={headingTitleClass}>Customer Reviews</h2>
+              <p className={headingTextClass}>What our customers say</p>
             </div>
-            <div className="reviews-grid">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {REVIEWS.map((review, i) => (
                 <div
                   key={i}
-                  className="review-card"
+                  className="rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-5"
                   data-reveal
                   style={{ transitionDelay: `${90 + i * 55}ms` }}
                 >
-                  <div className="stars">{"★".repeat(review.stars)}</div>
-                  {review.verified && <div className="verified">✓ Verified Purchase</div>}
-                  <p>{review.text}</p>
-                  <div className="author">— {review.author}</div>
+                  <div className="text-sm text-[#fbbf24]">{"★".repeat(review.stars)}</div>
+                  {review.verified && <div className="mt-1 text-xs font-semibold text-[#3fb950]">✓ Verified Purchase</div>}
+                  <p className="mt-3 text-sm text-[#d5deec]">{review.text}</p>
+                  <div className="mt-3 text-sm text-[#a8b6ca]">— {review.author}</div>
                 </div>
               ))}
             </div>

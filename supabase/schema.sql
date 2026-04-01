@@ -53,3 +53,87 @@ CREATE POLICY "Allow delete for authenticated" ON products
 FOR DELETE
 TO authenticated
 USING (auth.uid() IS NOT NULL);
+
+-- Site settings used for homepage/admin configuration (e.g. carousel products)
+CREATE TABLE IF NOT EXISTS site_settings (
+  setting_key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read settings" ON site_settings;
+DROP POLICY IF EXISTS "Allow write settings for authenticated" ON site_settings;
+DROP POLICY IF EXISTS "Allow update settings for authenticated" ON site_settings;
+DROP POLICY IF EXISTS "Allow delete settings for authenticated" ON site_settings;
+
+CREATE POLICY "Allow public read settings" ON site_settings
+FOR SELECT
+USING (true);
+
+CREATE POLICY "Allow write settings for authenticated" ON site_settings
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow update settings for authenticated" ON site_settings
+FOR UPDATE
+TO authenticated
+USING (auth.uid() IS NOT NULL)
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow delete settings for authenticated" ON site_settings
+FOR DELETE
+TO authenticated
+USING (auth.uid() IS NOT NULL);
+
+-- Orders table used by checkout/admin order management
+CREATE TABLE IF NOT EXISTS orders (
+  id TEXT PRIMARY KEY,
+  placed_at TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('pending', 'shipped', 'fulfilled')),
+  source TEXT NOT NULL CHECK (source IN ('checkout', 'simulate')),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT,
+  customer_email TEXT,
+  address_line TEXT,
+  city TEXT,
+  state TEXT,
+  pincode TEXT,
+  payment_method TEXT,
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  subtotal INTEGER NOT NULL DEFAULT 0,
+  shipping_charge INTEGER NOT NULL DEFAULT 0,
+  grand_total INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read orders" ON orders;
+DROP POLICY IF EXISTS "Allow write orders for authenticated" ON orders;
+DROP POLICY IF EXISTS "Allow update orders for authenticated" ON orders;
+DROP POLICY IF EXISTS "Allow delete orders for authenticated" ON orders;
+
+CREATE POLICY "Allow public read orders" ON orders
+FOR SELECT
+USING (true);
+
+CREATE POLICY "Allow write orders for authenticated" ON orders
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow update orders for authenticated" ON orders
+FOR UPDATE
+TO authenticated
+USING (auth.uid() IS NOT NULL)
+WITH CHECK (auth.uid() IS NOT NULL);
+
+CREATE POLICY "Allow delete orders for authenticated" ON orders
+FOR DELETE
+TO authenticated
+USING (auth.uid() IS NOT NULL);

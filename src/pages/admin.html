@@ -4,53 +4,74 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard | Shivam Computer</title>
-    <link rel="stylesheet" href="../styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+      }
+    </style>
   </head>
-  <body data-page="admin">
-    <header class="site-header">
-      <div class="logo">Shivam Computer Admin</div>
+  <body
+    data-page="admin"
+    class="bg-[radial-gradient(circle_at_15%_12%,rgba(94,199,255,0.22),transparent_36%),radial-gradient(circle_at_85%_86%,rgba(122,86,255,0.14),transparent_40%),linear-gradient(165deg,#050812,#0b1120_52%,#111a2a)] text-[#ecf3ff]"
+  >
+    <header class="border-b border-[#2a3f5d] bg-[#050812]/95 backdrop-blur">
+      <div class="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-3">
+      <div class="text-lg font-semibold">Shivam Computer Admin</div>
       <nav>
-        <a href="../index.html">Storefront</a>
-        <a href="./login.html">Login</a>
+        <a class="mr-3 text-sm text-[#d5deec] transition hover:text-[#81d7ff]" href="../index.html">Storefront</a>
+        <a class="text-sm text-[#d5deec] transition hover:text-[#81d7ff]" href="./login.html">Login</a>
       </nav>
+      </div>
     </header>
 
-    <main class="admin-page">
-      <section class="stats-grid">
-        <article>
-          <p>Products live</p>
-          <h2 id="stat-products">0</h2>
+    <main class="mx-auto w-full max-w-7xl px-5 py-8">
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <article class="rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-4">
+          <p class="text-sm text-[#a8b6ca]">Products live</p>
+          <h2 id="stat-products" class="mt-1 text-3xl font-bold">0</h2>
         </article>
-        <article>
-          <p>Active orders</p>
-          <h2 id="stat-orders">0</h2>
+        <article class="rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-4">
+          <p class="text-sm text-[#a8b6ca]">Active orders</p>
+          <h2 id="stat-orders" class="mt-1 text-3xl font-bold">0</h2>
         </article>
-        <article>
-          <p>Low-stock alerts</p>
-          <h2 id="stat-lowstock">0</h2>
+        <article class="rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-4">
+          <p class="text-sm text-[#a8b6ca]">Low-stock alerts</p>
+          <h2 id="stat-lowstock" class="mt-1 text-3xl font-bold">0</h2>
         </article>
-        <article>
-          <p>Automation runs</p>
-          <h2 id="stat-automation">0</h2>
+        <article class="rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-4">
+          <p class="text-sm text-[#a8b6ca]">Automation runs</p>
+          <h2 id="stat-automation" class="mt-1 text-3xl font-bold">0</h2>
         </article>
       </section>
 
-      <section class="order-panel">
-        <div class="section-heading">
-          <h3>Incoming mock orders</h3>
-          <p>Orders submitted from the storefront UI push in here automatically.</p>
-        </div>
-        <div id="order-feed" class="order-feed"></div>
-      </section>
-
-      <section class="automation-panel">
+      <section class="mt-6 rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-5">
         <div>
-          <h3>Automation queue</h3>
-          <ul id="automation-log"></ul>
+          <h3 class="text-xl font-semibold">Incoming mock orders</h3>
+          <p class="mt-1 text-sm text-[#a8b6ca]">Orders submitted from the storefront UI push in here automatically.</p>
         </div>
-        <div class="admin-actions">
-          <button id="simulate-order" class="btn outline">Simulate order</button>
-          <button id="clear-orders" class="btn secondary">Clear mock orders</button>
+        <div id="order-feed" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"></div>
+      </section>
+
+      <section class="mt-6 rounded-xl border border-[#2a3f5d] bg-[linear-gradient(160deg,rgba(17,27,44,0.96),rgba(15,22,37,0.98))] p-5">
+        <div>
+          <h3 class="text-xl font-semibold">Automation queue</h3>
+          <ul id="automation-log" class="mt-3 space-y-1 text-sm text-[#d5deec]"></ul>
+        </div>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button id="simulate-order" class="rounded-full border border-[#2a3f5d] px-4 py-2 text-sm font-semibold transition hover:border-[#5ec7ff] hover:text-[#81d7ff]">Simulate order</button>
+          <button id="clear-orders" class="rounded-full border border-[#2a3f5d] px-4 py-2 text-sm font-semibold transition hover:border-[#5ec7ff] hover:text-[#81d7ff]">Clear mock orders</button>
         </div>
       </section>
     </main>

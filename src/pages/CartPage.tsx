@@ -15,93 +15,91 @@ export default function CartPage() {
   return (
     <>
       <HeaderWithDeals />
-      <main className="section">
-        <div className="container">
-          <div className="section-heading">
-            <h2>Shopping Cart</h2>
-            <p>{items.length} item(s)</p>
+      <main className="py-10">
+        <div className="mx-auto w-full max-w-6xl px-5">
+          <div className="mb-6">
+            <h2 className="text-2xl font-semibold text-[#ecf3ff]">Shopping Cart</h2>
+            <p className="mt-1 text-sm text-[#a8b6ca]">{items.length} item(s)</p>
           </div>
           {items.length === 0 ? (
-            <p className="text-muted">
+            <p className="text-sm text-[#a8b6ca]">
               Your cart is empty. <Link to="/">Continue shopping</Link>.
             </p>
           ) : (
-            <div className="cart-checkout-layout">
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
               <div>
                 {items.map(({ product, quantity }) => (
-                  <div key={product.id} className="cart-item">
-                    <img src={product.image} alt={product.name} />
-                    <div style={{ flex: 1 }}>
-                      <Link to={`/product/${product.id}`} style={{ fontWeight: 600 }}>
+                  <div key={product.id} className="mb-3 flex gap-4 rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-4">
+                    <img src={product.image} alt={product.name} className="h-20 w-20 rounded-lg object-contain bg-[#0f1625] p-2" />
+                    <div className="flex-1">
+                      <Link to={`/product/${product.id}`} className="font-semibold text-[#ecf3ff]">
                         {product.name}
                       </Link>
-                      <p className="text-muted" style={{ margin: "0.25rem 0" }}>
+                      <p className="my-1 text-sm text-[#a8b6ca]">
                         ₹{product.price.toLocaleString("en-IN")} × {quantity}
                       </p>
-                      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem" }}>
+                      <div className="mt-2 flex flex-wrap gap-2">
                         <button
                           type="button"
-                          className="btn secondary btn-sm"
+                          className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-3 py-1.5 text-xs font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
                           onClick={() => updateQuantity(product.id, quantity - 1)}
                         >
                           −
                         </button>
-                        <span style={{ alignSelf: "center" }}>{quantity}</span>
+                        <span className="self-center text-sm text-[#ecf3ff]">{quantity}</span>
                         <button
                           type="button"
-                          className="btn secondary btn-sm"
+                          className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-3 py-1.5 text-xs font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
                           onClick={() => updateQuantity(product.id, quantity + 1)}
                         >
                           +
                         </button>
                         <button
                           type="button"
-                          className="btn outline btn-sm"
+                          className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-3 py-1.5 text-xs font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
                           onClick={() => removeFromCart(product.id)}
                         >
                           Remove
                         </button>
                       </div>
                     </div>
-                    <div style={{ fontWeight: 700 }}>
+                    <div className="text-base font-bold text-[#ecf3ff]">
                       ₹{(product.price * quantity).toLocaleString("en-IN")}
                     </div>
                   </div>
                 ))}
-                <div style={{ marginTop: "1rem" }}>
-                  <label style={{ display: "block", marginBottom: "0.35rem" }}>Coupon</label>
-                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div className="mt-4">
+                  <label className="mb-1 block text-sm text-[#d5deec]">Coupon</label>
+                  <div className="flex gap-2">
                     <input
                       type="text"
                       placeholder="Enter coupon code"
                       value={coupon}
                       onChange={(e) => setCoupon(e.target.value)}
-                      style={{
-                        padding: "0.5rem 0.75rem",
-                        border: "1px solid var(--border)",
-                        borderRadius: "8px",
-                        flex: 1,
-                      }}
+                      className="flex-1 rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
                     />
-                    <button type="button" className="btn secondary btn-sm">Apply</button>
+                    <button type="button" className="rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-4 py-2 text-xs font-semibold text-[#050812] transition hover:bg-[#81d7ff]">Apply</button>
                   </div>
                 </div>
               </div>
-              <div className="cart-summary">
-                <h3 style={{ margin: "0 0 1rem" }}>Order Summary</h3>
-                <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 0.5rem" }}>
+              <div className="h-fit rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-4">
+                <h3 className="mb-4 text-lg font-semibold text-[#ecf3ff]">Order Summary</h3>
+                <p className="mb-2 flex justify-between text-sm text-[#d5deec]">
                   <span>Subtotal</span>
                   <span>₹{subtotal.toLocaleString("en-IN")}</span>
                 </p>
-                <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 0.5rem" }}>
+                <p className="mb-2 flex justify-between text-sm text-[#d5deec]">
                   <span>Shipping</span>
                   <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
                 </p>
-                <p style={{ display: "flex", justifyContent: "space-between", margin: "0 0 1rem", fontWeight: 700, fontSize: "1.1rem" }}>
+                <p className="mb-4 flex justify-between text-lg font-bold text-[#ecf3ff]">
                   <span>Total</span>
                   <span>₹{total.toLocaleString("en-IN")}</span>
                 </p>
-                <Link to="/checkout" className="btn primary" style={{ width: "100%", textAlign: "center" }}>
+                <Link
+                  to="/checkout"
+                  className="inline-flex w-full items-center justify-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-5 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+                >
                   Proceed to Checkout
                 </Link>
               </div>
