@@ -215,7 +215,8 @@ export default function AdminPage() {
   if (authLoading) {
     return (
       <>
-        <HeaderWithDeals />
+        {/* Hide global nav bar for admin-only view */}
+        <HeaderWithDeals showNav={false} />
         <main className="flex min-h-[60vh] items-center justify-center px-4 py-8">
           <div className="w-full max-w-md rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-6 text-center">
             <h1 className="text-2xl font-semibold text-[#ecf3ff]">Loading…</h1>
@@ -230,7 +231,7 @@ export default function AdminPage() {
   if (!user) {
     return (
       <>
-        <HeaderWithDeals />
+        <HeaderWithDeals showNav={false} />
         <main className="flex min-h-[60vh] items-center justify-center px-4 py-8">
           <div className="w-full max-w-md rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-6 text-center">
             <h1 className="text-2xl font-semibold text-[#ecf3ff]">Access restricted</h1>
@@ -369,7 +370,7 @@ export default function AdminPage() {
 
   return (
     <>
-      <HeaderWithDeals />
+      <HeaderWithDeals showNav={false} />
       <main className="mx-auto w-full max-w-7xl px-5 py-10">
         <div className="mb-6 inline-flex flex-wrap gap-2 rounded-2xl border border-[#2a3f5d] bg-[#0f1625]/95 p-2 shadow-[0_8px_24px_rgba(5,8,18,0.4)]">
           <button

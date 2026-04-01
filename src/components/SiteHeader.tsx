@@ -91,7 +91,11 @@ function DropdownLink({ item }: { item: MenuItem }) {
   );
 }
 
-export default function SiteHeader() {
+type SiteHeaderProps = {
+  showNav?: boolean;
+};
+
+export default function SiteHeader({ showNav = true }: SiteHeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { count } = useCart();
@@ -303,23 +307,25 @@ export default function SiteHeader() {
         </div>
       </div>
 
-      <div className="border-t border-[#2a3f5d] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0))]">
-        <nav className="mx-auto flex w-full max-w-7xl items-center justify-start gap-2 overflow-x-auto px-4 py-2.5 sm:justify-center [&::-webkit-scrollbar]:hidden">
-          {navCategories.map(({ label, path }) => (
-            <Link
-              key={path}
-              to={path}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-semibold tracking-[0.01em] transition ${
-                location.pathname === path
-                  ? "bg-[linear-gradient(90deg,rgba(94,199,255,0.28),rgba(34,197,94,0.18))] text-[#b8e6ff] shadow-[inset_0_0_0_1px_rgba(94,199,255,0.48)]"
-                  : "text-[#d5deec] hover:bg-[#ffffff12] hover:text-white"
-              }`}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      {showNav && (
+        <div className="border-t border-[#2a3f5d] bg-[linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0))]">
+          <nav className="mx-auto flex w-full max-w-7xl items-center justify-start gap-2 overflow-x-auto px-4 py-2.5 sm:justify-center [&::-webkit-scrollbar]:hidden">
+            {navCategories.map(({ label, path }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-semibold tracking-[0.01em] transition ${
+                  location.pathname === path
+                    ? "bg-[linear-gradient(90deg,rgba(94,199,255,0.28),rgba(34,197,94,0.18))] text-[#b8e6ff] shadow-[inset_0_0_0_1px_rgba(94,199,255,0.48)]"
+                    : "text-[#d5deec] hover:bg-[#ffffff12] hover:text-white"
+                }`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
