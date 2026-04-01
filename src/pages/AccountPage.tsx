@@ -148,18 +148,40 @@ export default function AccountPage() {
 
               <div>
                 <label className="mb-1 block text-sm text-[#d5deec]">Title</label>
-                <select
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
-                >
-                  <option value="">Select Title</option>
-                  <option value="Mr">Mr.</option>
-                  <option value="Ms">Ms.</option>
-                  <option value="Mrs">Mrs.</option>
-                  <option value="Dr">Dr.</option>
-                </select>
+                <div className="relative">
+                  <select
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    className="w-full appearance-none rounded-lg border border-[#2a3f5d] bg-[#0d1424] px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
+                  >
+                    <option value="" style={{ backgroundColor: "#0d1424", color: "#ecf3ff" }}>
+                      Select Title
+                    </option>
+                    <option value="Mr" style={{ backgroundColor: "#0d1424", color: "#ecf3ff" }}>
+                      Mr.
+                    </option>
+                    <option value="Ms" style={{ backgroundColor: "#0d1424", color: "#ecf3ff" }}>
+                      Ms.
+                    </option>
+                    <option value="Mrs" style={{ backgroundColor: "#0d1424", color: "#ecf3ff" }}>
+                      Mrs.
+                    </option>
+                    <option value="Dr" style={{ backgroundColor: "#0d1424", color: "#ecf3ff" }}>
+                      Dr.
+                    </option>
+                  </select>
+                  <svg
+                    aria-hidden="true"
+                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7aa6d9]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
 
               <div>
@@ -247,10 +269,16 @@ export default function AccountPage() {
               <div>
                 <label className="mb-1 block text-sm text-[#d5deec]">Date of Birth</label>
                 <input
-                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
-                  type="date"
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] placeholder:text-[#7f8ead] outline-none transition focus:border-[#5ec7ff]"
+                  type={formData.dob ? "date" : "text"}
+                  inputMode="numeric"
+                  placeholder="dd - mm - yyyy"
                   name="dob"
                   value={formData.dob}
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = "text";
+                  }}
                   onChange={handleChange}
                 />
               </div>
@@ -258,21 +286,27 @@ export default function AccountPage() {
               <div>
                 <label className="mb-1 block text-sm text-[#d5deec]">Date of Anniversary</label>
                 <input
-                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] outline-none transition focus:border-[#5ec7ff]"
-                  type="date"
+                  className="w-full rounded-lg border border-[#2a3f5d] bg-transparent px-3 py-2 text-sm text-[#ecf3ff] placeholder:text-[#7f8ead] outline-none transition focus:border-[#5ec7ff]"
+                  type={formData.anniversary ? "date" : "text"}
+                  inputMode="numeric"
+                  placeholder="dd - mm - yyyy"
                   name="anniversary"
                   value={formData.anniversary}
+                  onFocus={(e) => (e.target.type = "date")}
+                  onBlur={(e) => {
+                    if (!e.target.value) e.target.type = "text";
+                  }}
                   onChange={handleChange}
                 />
               </div>
 
             </div>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button
-                type="button"
-                className="rounded-full border border-[#2a3f5d] px-5 py-2.5 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff]"
-                onClick={handleDiscard}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  className="rounded-full border border-[#3a506f] bg-white/10 px-5 py-2.5 text-sm font-semibold text-[#d5deec] backdrop-blur transition hover:border-[#5ec7ff] hover:bg-white/15 hover:text-[#5ec7ff]"
+                  onClick={handleDiscard}
               >
                 DISCARD CHANGES
               </button>
