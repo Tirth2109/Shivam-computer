@@ -29,7 +29,11 @@ export default function WishlistPage() {
             {items.length > 0 && (
               <button
                 type="button"
-                className="inline-flex items-center rounded-full border border-[#2a3f5d] px-4 py-2 text-xs font-semibold text-[#ecf3ff] transition hover:border-[#f85149] hover:text-[#f87171]"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold text-[#050812] shadow-[0_10px_30px_rgba(248,81,73,0.25)] transition hover:shadow-[0_12px_34px_rgba(248,81,73,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f85149] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1120]"
+                style={{
+                  background: "linear-gradient(135deg, #ff7b72 0%, #f85149 48%, #ff9f7a 100%)",
+                  border: "1px solid #f98a80"
+                }}
                 onClick={clearWishlist}
               >
                 Clear Wishlist

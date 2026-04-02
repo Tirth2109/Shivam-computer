@@ -87,6 +87,22 @@ h6 {
   color: #f8fbff;
 }
 
+/* Make native selects match the dark theme so options aren't washed out */
+select {
+  color: var(--theme-text);
+  background-color: transparent;
+}
+
+select option {
+  color: var(--theme-text);
+  background-color: var(--theme-surface-1);
+}
+
+select option:checked,
+select option:hover {
+  background-color: var(--theme-surface-3);
+}
+
 @layer utilities {
   .bg-\[\#111b2c\] {
     background-color: #111b2c !important;

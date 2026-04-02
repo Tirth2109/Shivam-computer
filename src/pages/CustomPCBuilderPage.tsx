@@ -37,7 +37,7 @@ export default function CustomPCBuilderPage() {
   const primaryBtn =
     "inline-flex items-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-5 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]";
   const secondaryBtn =
-    "inline-flex items-center rounded-full border border-[#2a3f5d] px-5 py-2.5 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff]";
+    "inline-flex items-center rounded-full border border-[#354a69] bg-[#0f1625]/70 px-5 py-2.5 text-sm font-semibold text-[#d5deec] shadow-[0_6px_16px_rgba(0,0,0,0.35)] transition hover:border-[#5ec7ff] hover:text-[#5ec7ff] hover:bg-[#162339]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5ec7ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1120]";
 
   return (
     <>
