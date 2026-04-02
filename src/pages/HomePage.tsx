@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import HeaderWithDeals from "../components/HeaderWithDeals";
 import Footer from "../components/Footer";
@@ -23,6 +24,39 @@ const REVIEWS = [
   { stars: 5, text: "Custom build support team helped me choose the right parts for my budget. Very satisfied.", author: "Vikram K.", verified: true },
 ];
 
+const FAQ_ITEMS = [
+  {
+    icon: "🚚",
+    question: "Do you ship across India?",
+    answer: "Yes. In-stock parts ship pan-India with insured, foam-in-box packing. Dispatch usually happens within 24-48 hours.",
+  },
+  {
+    icon: "🧰",
+    question: "How do I order a custom PC online?",
+    answer: "Use the Custom Build page, pick budget and purpose, and our team finalizes a compatible list before assembling and shipping.",
+  },
+  {
+    icon: "🔒",
+    question: "Are the products genuine with warranty?",
+    answer: "All parts are sealed, billed with a GST invoice, and covered by the respective brand warranty across India.",
+  },
+  {
+    icon: "🧪",
+    question: "Do you test PCs before delivery?",
+    answer: "Every build is cable-managed, stress-tested, and then packed with cushioning so it's ready to plug and play.",
+  },
+  {
+    icon: "🎯",
+    question: "Can you help me choose the right parts?",
+    answer: "Yes. Tell us your game/workload and budget on WhatsApp or call; we'll share a balanced shortlist that avoids bottlenecks.",
+  },
+  {
+    icon: "♻️",
+    question: "What if I need a replacement?",
+    answer: "If something arrives damaged or defective, contact support immediately. We assist with quick replacements within policy and warranty.",
+  },
+];
+
 function pickUniqueProducts(list: Product[], count: number) {
   const seen = new Set<string>();
   const result: Product[] = [];
@@ -39,6 +73,7 @@ function pickUniqueProducts(list: Product[], count: number) {
 
 export default function HomePage() {
   const { bestSellers, newArrivals, topDeals } = useProducts();
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const featuredPool = [...topDeals, ...bestSellers, ...newArrivals];
   const whatsHot = pickUniqueProducts(featuredPool, 4);
@@ -189,6 +224,112 @@ export default function HomePage() {
                   <p className="mt-2 text-sm text-[#a8b6ca]">{item.text}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className={`${sectionAltClass} relative overflow-hidden`} data-reveal>
+          <div className="pointer-events-none absolute -left-20 top-[-140px] h-60 w-60 rounded-full bg-[#5ec7ff1f] blur-3xl" aria-hidden />
+          <div className="pointer-events-none absolute -right-24 bottom-[-120px] h-64 w-64 rounded-full bg-[#81d7ff1a] blur-3xl" aria-hidden />
+          <div className={containerClass}>
+            <div className="mb-8 flex flex-col gap-2" data-reveal style={{ transitionDelay: "40ms" }}>
+              <p className="inline-flex w-fit items-center gap-2 rounded-full border border-[#2a3f5d] bg-[#111b2c] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#5ec7ff]">
+                FAQs
+                <span className="h-1 w-1 rounded-full bg-[#5ec7ff]" />
+                Quick Help
+              </p>
+              <h2 className="text-3xl font-semibold text-[#ecf3ff]">Frequently asked questions</h2>
+              <p className={headingTextClass}>Answers tailored for Shivam Computer customers.</p>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+              <div className="space-y-3">
+                {FAQ_ITEMS.map((item, i) => {
+                  const isOpen = openFaq === i;
+                  return (
+                    <button
+                      key={item.question}
+                      type="button"
+                      onClick={() => setOpenFaq(isOpen ? null : i)}
+                      aria-expanded={isOpen}
+                      className="group w-full overflow-hidden rounded-2xl border border-[#2a3f5d] bg-[#111b2c] p-4 text-left transition hover:-translate-y-1 hover:border-[#5ec7ff66] hover:shadow-[0_18px_40px_rgba(5,8,18,0.35)]"
+                      data-reveal
+                      style={{ transitionDelay: `${80 + i * 35}ms` }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#5ec7ff1f] text-lg">
+                          {item.icon}
+                        </span>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <h4 className="text-base font-semibold text-[#ecf3ff]">{item.question}</h4>
+                            <span
+                              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#2a3f5d] text-lg font-semibold text-[#ecf3ff] transition ${
+                                isOpen ? "bg-[#5ec7ff1f] text-[#5ec7ff]" : "bg-[#0f1625]"
+                              }`}
+                              aria-hidden
+                            >
+                              {isOpen ? "-" : "+"}
+                            </span>
+                          </div>
+                          <div
+                            className={`mt-2 overflow-hidden text-sm text-[#a8b6ca] transition-all duration-300 ${
+                              isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                            }`}
+                          >
+                            {item.answer}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div
+                className="relative overflow-hidden rounded-2xl border border-[#2a3f5d] bg-[#0f1625] p-6 shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+                data-reveal
+                style={{ transitionDelay: "120ms" }}
+              >
+                <div className="pointer-events-none absolute -right-10 -top-12 h-32 w-32 rounded-full bg-[#5ec7ff26] blur-3xl" aria-hidden />
+                <div className="pointer-events-none absolute -left-14 bottom-0 h-28 w-28 rounded-full bg-[#81d7ff1a] blur-2xl" aria-hidden />
+                <div className="relative flex flex-col gap-3">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#5ec7ff1f] text-[#5ec7ff]">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                      <path d="M9 18h6" />
+                      <path d="M10 14a4 4 0 1 1 4 0v2h-4v-2z" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-[#ecf3ff]">Need personal guidance?</h3>
+                  <p className="text-sm text-[#a8b6ca]">
+                    Talk to our build experts for compatibility checks, upgrade advice, and delivery timelines.
+                  </p>
+                  <div className="rounded-xl border border-dashed border-[#2a3f5d] bg-[#111b2c] px-4 py-3 text-sm text-[#d5deec]">
+                    <div className="font-semibold text-[#5ec7ff]">Direct support</div>
+                    <div>WhatsApp: +91 99746 55284</div>
+                    <div>Call: +91 99786 80246 / 99253 80246</div>
+                    <div>Email: shivam.computer66@gmail.com</div>
+                  </div>
+                  <div className="flex flex-wrap gap-3 pt-1">
+                    <a
+                      href="https://wa.me/919974655284?text=Hi%2C%20I%20need%20help%20choosing%20a%20PC%20or%20component."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-4 py-2 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
+                    >
+                      Chat on WhatsApp
+                    </a>
+                    <Link
+                      to="/support"
+                      className="inline-flex items-center justify-center rounded-full border border-[#2a3f5d] bg-[#0f1625] px-4 py-2 text-sm font-semibold text-[#ecf3ff] transition hover:border-[#5ec7ff66]"
+                    >
+                      Request a callback
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
