@@ -7,6 +7,7 @@ import WhatsAppFloat from "../components/WhatsAppFloat";
 import ProductCard from "../components/ProductCard";
 import { categories } from "../data/categories";
 import { useProducts } from "../context/ProductsContext";
+import { useBuilder } from "../context/BuilderContext";
 import type { Product } from "../types";
 
 const TRUST_ITEMS = [
@@ -73,6 +74,7 @@ function pickUniqueProducts(list: Product[], count: number) {
 
 export default function HomePage() {
   const { bestSellers, newArrivals, topDeals } = useProducts();
+  const { config: builderConfig, activeSteps: builderSteps } = useBuilder();
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const featuredPool = [...topDeals, ...bestSellers, ...newArrivals];
@@ -159,35 +161,33 @@ export default function HomePage() {
         <section className={sectionClass} data-reveal>
           <div className={containerClass}>
             <div className="rounded-2xl border border-[#2a3f5d] bg-[#111b2c] px-5 py-7">
-              <h2 className={headingTitleClass} data-reveal style={{ transitionDelay: "30ms" }}>Build Your Custom PC</h2>
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "90ms" }}>
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">1</div>
-                  <p className="text-xs text-[#d5deec]">Choose your budget</p>
-                </div>
-                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "130ms" }}>
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">2</div>
-                  <p className="text-xs text-[#d5deec]">Select purpose (Gaming / Office / Editing)</p>
-                </div>
-                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "170ms" }}>
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">3</div>
-                  <p className="text-xs text-[#d5deec]">Pick parts (guided compatibility)</p>
-                </div>
-                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "210ms" }}>
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">4</div>
-                  <p className="text-xs text-[#d5deec]">Get assembled & tested</p>
-                </div>
-                <div className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center" data-reveal style={{ transitionDelay: "250ms" }}>
-                  <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">5</div>
-                  <p className="text-xs text-[#d5deec]">Delivered to your doorstep</p>
-                </div>
+              <h2 className={headingTitleClass} data-reveal style={{ transitionDelay: "30ms" }}>
+                {builderConfig.settings.heroHeading}
+              </h2>
+              <p className={headingTextClass} data-reveal style={{ transitionDelay: "60ms" }}>
+                {builderConfig.settings.heroSubheading}
+              </p>
+              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {builderSteps.map((step, i) => (
+                  <div
+                    key={step.id}
+                    className="rounded-xl border border-[#2a3f5d] bg-[#0f1625] p-3 text-center"
+                    data-reveal
+                    style={{ transitionDelay: `${90 + i * 40}ms` }}
+                  >
+                    <div className="mx-auto mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white">
+                      {i + 1}
+                    </div>
+                    <p className="text-xs text-[#d5deec]">{step.title}</p>
+                  </div>
+                ))}
               </div>
               <div className="mt-5" data-reveal style={{ transitionDelay: "300ms" }}>
                 <Link
                   to="/custom-build"
                   className="inline-flex items-center rounded-full border border-[#5ec7ff] bg-[#5ec7ff] px-5 py-2.5 text-sm font-semibold text-[#050812] transition hover:bg-[#81d7ff]"
                 >
-                  Start Custom Build
+                  {builderConfig.settings.ctaLabel}
                 </Link>
               </div>
             </div>

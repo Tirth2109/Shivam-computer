@@ -89,6 +89,9 @@ FOR DELETE
 TO authenticated
 USING (auth.uid() IS NOT NULL);
 
+-- Builder configuration lives in site_settings as JSON (setting_key = 'builder_config').
+-- The frontend admin writes and reads that key; no extra table required for the builder wizard.
+
 -- Orders table used by checkout/admin order management
 CREATE TABLE IF NOT EXISTS orders (
   id TEXT PRIMARY KEY,

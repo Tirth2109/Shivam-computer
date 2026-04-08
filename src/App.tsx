@@ -3,8 +3,10 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-route
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { ProductsProvider } from "./context/ProductsContext";
+import { BuilderProvider } from "./context/BuilderContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { useScrollReveal } from "./hooks/useScrollReveal";
+import { useAuth } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -15,6 +17,7 @@ import DealsPage from "./pages/DealsPage";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
+import BuilderAdminPage from "./pages/BuilderAdminPage";
 import AccountPage from "./pages/AccountPage";
 import WishlistPage from "./pages/WishlistPage";
 
@@ -97,7 +100,22 @@ function AppRoutes() {
         />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminPage />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/builder"
+          element={
+            <AdminRoute>
+              <BuilderAdminPage />
+            </AdminRoute>
+          }
+        />
         <Route
           path="/shipping"
           element={
@@ -163,15 +181,32 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <ProductsProvider>
-          <WishlistProvider>
-            <CartProvider>
-              <AppRoutes />
-            </CartProvider>
-          </WishlistProvider>
+          <BuilderProvider>
+            <WishlistProvider>
+              <CartProvider>
+                <AppRoutes />
+              </CartProvider>
+            </WishlistProvider>
+          </BuilderProvider>
         </ProductsProvider>
       </AuthProvider>
     </BrowserRouter>
   );
+}
+
+function AdminRoute({ children }: { children: JSX.Element }) {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0b1120] text-sm text-[#a8b6ca]">
+        Checking admin access...
+      </div>
+    );
+  }
+  if (!user || user.role !== "admin") {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
 }
 
 export default App;
