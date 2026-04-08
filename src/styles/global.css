@@ -215,6 +215,88 @@ main {
   }
 }
 
+@keyframes why-hex-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes why-icon-breathe {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(94, 199, 255, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(94, 199, 255, 0);
+  }
+}
+
+.why-hex-card {
+  position: relative;
+  isolation: isolate;
+  animation: why-hex-float 7.2s ease-in-out infinite;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.why-hex-card:hover {
+  transform: translateY(-4px) scale(1.015);
+}
+
+.why-hex-shell,
+.why-hex-core {
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(24% 5%, 76% 5%, 100% 50%, 76% 95%, 24% 95%, 0 50%);
+}
+
+.why-hex-shell {
+  background: linear-gradient(155deg, rgba(58, 87, 126, 0.95), rgba(42, 63, 93, 0.72));
+  box-shadow: 0 16px 35px rgba(4, 8, 17, 0.5);
+}
+
+.why-hex-core {
+  inset: 1.5px;
+  border: 1px solid rgba(126, 170, 228, 0.35);
+  background:
+    radial-gradient(circle at 18% 14%, rgba(94, 199, 255, 0.17), transparent 42%),
+    linear-gradient(160deg, rgba(21, 38, 61, 0.96), rgba(12, 20, 34, 0.98));
+}
+
+.why-hex-card::after {
+  content: "";
+  position: absolute;
+  inset: 28% 18%;
+  z-index: 0;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(94, 199, 255, 0.24), rgba(94, 199, 255, 0) 72%);
+  filter: blur(14px);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.why-hex-card:hover::after {
+  opacity: 1;
+}
+
+.why-hex-icon {
+  border: 1px solid rgba(94, 199, 255, 0.35);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(94, 199, 255, 0.32), rgba(94, 199, 255, 0.08)),
+    rgba(14, 23, 38, 0.75);
+  animation: why-icon-breathe 3.8s ease-in-out infinite;
+}
+
+.why-hex-card:hover .why-hex-icon {
+  border-color: rgba(129, 215, 255, 0.8);
+  background:
+    radial-gradient(circle at 30% 25%, rgba(129, 215, 255, 0.42), rgba(94, 199, 255, 0.14)),
+    rgba(14, 23, 38, 0.84);
+}
+
 
 @keyframes auth-grid-pulse {
   0%,
@@ -323,6 +405,11 @@ input:-webkit-autofill:active {
   .footer-logo3d .footer-logo3d-cube,
   .footer-logo3d:hover .footer-logo3d-cube {
     transform: none;
+  }
+
+  .why-hex-card,
+  .why-hex-icon {
+    animation: none;
   }
 }
 

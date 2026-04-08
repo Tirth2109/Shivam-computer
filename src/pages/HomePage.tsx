@@ -19,6 +19,15 @@ const TRUST_ITEMS = [
   { icon: "🛠️", title: "Expert Technical Support", text: "WhatsApp & call support for builds" },
 ];
 
+const TRUST_HEX_POSITIONS = [
+  "lg:col-start-1",
+  "lg:col-start-3",
+  "lg:col-start-5",
+  "lg:col-start-2",
+  "lg:col-start-4",
+  "lg:col-start-6",
+];
+
 const REVIEWS = [
   { stars: 5, text: "Got my custom gaming PC in 5 days. Build quality and cable management were top notch. Highly recommend!", author: "Rahul M.", verified: true },
   { stars: 5, text: "Best prices on components. Bought RAM and SSD. Genuine products, fast delivery.", author: "Priya S.", verified: true },
@@ -205,25 +214,52 @@ export default function HomePage() {
         </section>
 
         {/* Why Shivam Computer */}
-        <section className={sectionClass} data-reveal>
+        <section className={`${sectionClass} relative overflow-hidden`} data-reveal>
+          <div
+            className="pointer-events-none absolute left-1/2 top-8 h-56 w-56 -translate-x-1/2 rounded-full bg-[#5ec7ff1a] blur-3xl"
+            aria-hidden
+          />
           <div className={containerClass}>
-            <div className="mb-6" data-reveal style={{ transitionDelay: "40ms" }}>
+            <div className="mb-6 text-center" data-reveal style={{ transitionDelay: "40ms" }}>
               <h2 className={headingTitleClass}>Why Shivam Computer</h2>
               <p className={headingTextClass}>Your trusted partner for PCs and components</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {TRUST_ITEMS.map((item, i) => (
-                <div
-                  key={item.title}
-                  className="rounded-xl border border-[#2a3f5d] bg-[#111b2c] p-5"
-                  data-reveal
-                  style={{ transitionDelay: `${80 + i * 35}ms` }}
-                >
-                  <div className="mb-2 text-2xl">{item.icon}</div>
-                  <h4 className="text-base font-semibold text-[#ecf3ff]">{item.title}</h4>
-                  <p className="mt-2 text-sm text-[#a8b6ca]">{item.text}</p>
-                </div>
-              ))}
+            <div className="why-hex-network relative mx-auto max-w-[1100px]">
+              <div
+                className="pointer-events-none absolute inset-x-8 top-[38%] hidden h-px bg-gradient-to-r from-transparent via-[#2a3f5d] to-transparent lg:block"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-x-16 top-[67%] hidden h-px bg-gradient-to-r from-transparent via-[#2a3f5d]/80 to-transparent lg:block"
+                aria-hidden
+              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-7 lg:gap-x-0 lg:gap-y-2">
+                {TRUST_ITEMS.map((item, i) => (
+                  <article
+                    key={item.title}
+                    className={`mx-auto w-full max-w-[320px] lg:col-span-2 ${TRUST_HEX_POSITIONS[i] ?? "lg:col-start-1"} ${
+                      i >= Math.ceil(TRUST_ITEMS.length / 2) ? "lg:-mt-16" : ""
+                    }`}
+                    data-reveal
+                    style={{ transitionDelay: `${80 + i * 35}ms` }}
+                  >
+                    <div
+                      className="why-hex-card group h-[220px] sm:h-[230px] lg:h-[240px]"
+                      style={{ animationDelay: `${i * 0.35}s` }}
+                    >
+                      <div className="why-hex-shell" />
+                      <div className="why-hex-core" />
+                      <div className="relative z-10 flex h-full flex-col items-center justify-center px-10 text-center">
+                        <span className="why-hex-icon mb-3 inline-flex h-11 w-11 items-center justify-center rounded-full text-xl text-[#5ec7ff]">
+                          {item.icon}
+                        </span>
+                        <h4 className="text-base font-semibold leading-tight text-[#ecf3ff]">{item.title}</h4>
+                        <p className="mt-2 text-sm leading-relaxed text-[#a8b6ca]">{item.text}</p>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
           </div>
         </section>
